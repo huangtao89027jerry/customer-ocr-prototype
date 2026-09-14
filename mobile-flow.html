@@ -51,6 +51,10 @@ h1{font-size:19px;margin:0 0 6px}
 .chip b{margin-left:4px;font-weight:500}
 .rowcard{background:#fff;border-radius:var(--radius);padding:12px;margin-bottom:9px}
 .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:8px}
+.rowhead .left{display:flex;align-items:center;gap:8px}
+.pickbox{width:20px;height:20px;border:1px solid #bfbfbf;border-radius:5px;flex:none;position:relative;background:#fff}
+.pickbox.on{background:var(--blue);border-color:var(--blue)}
+.pickbox.on:after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 .fieldname{font-weight:600;font-size:13.5px}
 .src{color:var(--muted);font-size:12px;margin-bottom:7px}
 .fake-input{height:36px;border:1px solid #d9d9d9;border-radius:8px;display:flex;align-items:center;padding:0 11px;font-size:13.5px;color:var(--text);background:#fff}
@@ -146,24 +150,24 @@ h1{font-size:19px;margin:0 0 6px}
           <div class="chip">需确认 <b>1</b></div>
         </div>
         <div class="rowcard">
-          <div class="rowhead"><span class="fieldname">姓名</span><span class="tag tag-ok">可导入</span></div>
+          <div class="rowhead"><div class="left"><span class="pickbox on"></span><span class="fieldname">姓名</span></div><span class="tag tag-ok">可导入</span></div>
           <div class="src">识别内容：张柏</div>
           <div class="fake-input">张柏</div>
         </div>
         <div class="rowcard">
-          <div class="rowhead"><span class="fieldname">预约试听时间</span><span class="tag tag-ok">可导入</span></div>
+          <div class="rowhead"><div class="left"><span class="pickbox on"></span><span class="fieldname">预约试听时间</span></div><span class="tag tag-ok">可导入</span></div>
           <div class="src">识别内容：下周日 13:00-14:30</div>
           <div class="fake-input">下周日 13:00-14:30</div>
         </div>
         <div class="rowcard">
-          <div class="rowhead"><span class="fieldname">意向课程</span><span class="tag tag-warn">需确认</span></div>
+          <div class="rowhead"><div class="left"><span class="pickbox on"></span><span class="fieldname">意向课程</span></div><span class="tag tag-warn">需确认</span></div>
           <div class="src">识别内容：下周日 13:00-14:30 周磊</div>
           <div class="fake-input">下周日 13:00-14:30</div>
         </div>
       </div>
       <div class="actionbar"><button class="btn">确认并导入</button></div>
     </div>
-    <div class="note">手机端不用表格，改成卡片逐条核对；筛选做成横向可滑的胶囊。</div>
+    <div class="note">手机端不用表格，改成卡片逐条核对。每项都能单独勾选（决定是否采用）、直接改值；取消勾选后该项变灰且不可编辑。底部按钮实时显示已选数量。</div>
   </div>
 
   <div class="wrap">

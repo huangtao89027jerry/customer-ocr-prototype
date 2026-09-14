@@ -47,6 +47,15 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .chip b{margin-left:4px;font-weight:500}
 .rowcard{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:10px}
 .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+.rowhead .left{display:flex;align-items:center;gap:8px;min-width:0}
+.pick{position:relative;width:20px;height:20px;flex:none}
+.pick input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%}
+.pick .box{display:block;width:20px;height:20px;border:1px solid #bfbfbf;border-radius:5px;background:#fff;position:relative}
+.pick input:checked+.box{background:var(--blue);border-color:var(--blue)}
+.pick input:checked+.box:after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.pick input:disabled+.box{background:#f5f5f5;border-color:#e5e5e5}
+.rowcard.off{opacity:.6}
+.rowcard.off input:not([type=checkbox]){background:#fafafa;color:#bfbfbf}
 .fieldname{font-weight:600}
 .src{color:var(--muted);font-size:12.5px;margin-bottom:8px;word-break:break-all}
 .rowcard input{width:100%;height:40px;border:1px solid #d9d9d9;border-radius:8px;padding:0 12px;font-size:15px;outline:none;background:#fff;color:var(--text)}
@@ -109,12 +118,12 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       <div class="chip" data-f="muted">无法匹配 <b>1</b></div>
     </div>
     <div id="list">
-      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">姓名</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：张柏</div><input value="张柏"></div>
-      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">出生日期</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：2010</div><input value="2010-09-20"></div>
-      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">性别</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：女</div><input value="女"></div>
-      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">预约试听时间</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：下周日 13:00-14:30</div><input value="下周日 13:00-14:30"></div>
-      <div class="rowcard" data-k="warn"><div class="rowhead"><span class="fieldname">意向课程</span><span class="tag tag-warn">需确认</span></div><div class="src">识别内容：下周日 13:00-14:30 周磊</div><input value="下周日 13:00-14:30"></div>
-      <div class="rowcard" data-k="muted"><div class="rowhead"><span class="fieldname">手机号</span><span class="tag tag-muted">无法匹配</span></div><div class="src">识别内容：家长电话号码</div><input placeholder="识别失败"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">姓名</span></div><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：张柏</div><input value="张柏"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">出生日期</span></div><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：2010</div><input value="2010-09-20"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">性别</span></div><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：女</div><input value="女"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">预约试听时间</span></div><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：下周日 13:00-14:30</div><input value="下周日 13:00-14:30"></div>
+      <div class="rowcard" data-k="warn"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">意向课程</span></div><span class="tag tag-warn">需确认</span></div><div class="src">识别内容：下周日 13:00-14:30 周磊</div><input value="下周日 13:00-14:30"></div>
+      <div class="rowcard" data-k="muted"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" disabled><span class="box"></span></label><span class="fieldname">手机号</span></div><span class="tag tag-muted">无法匹配</span></div><div class="src">识别内容：家长电话号码</div><input placeholder="识别失败" disabled></div>
       <div class="tip" style="padding:0 4px 8px">修改后的内容会在点击「确认并导入」后回填到客户资料。</div>
     </div>
   </section>
@@ -143,6 +152,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       toastEl=document.getElementById('toast');
 
   function cells(){return uploader.querySelectorAll('.cell').length}
+  function picked(){return document.querySelectorAll('#list .pick input:checked').length}
   function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._t);toastEl._t=setTimeout(function(){toastEl.classList.remove('show')},1900)}
   function sync(){
     var n=cells();
@@ -151,8 +161,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     cnt.textContent=n+'/10';
     hint.textContent=n>=10?'已达上限':'还可上传 '+(10-n)+' 张';
     addBtn.classList.toggle('hide',n>=10);
-    mainBtn.disabled=(step===1&&n===0);
-    mainBtn.textContent=step===2?'确认并导入':(n===0?'开始识别':'开始识别（'+n+'）');
+    if(step===1){mainBtn.disabled=(n===0);mainBtn.textContent=n===0?'开始识别':'开始识别（'+n+'）'}
+    else{var p=picked();mainBtn.disabled=(p===0);mainBtn.textContent='确认并导入（'+p+'）'}
   }
   function openViewer(src){viewerImg.src=src;viewer.classList.add('show')}
   function closeViewer(){viewer.classList.remove('show')}
@@ -205,6 +215,16 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   document.getElementById('viewerClose').onclick=closeViewer;
   viewer.onclick=function(e){if(e.target===viewer)closeViewer()};
 
+  Array.prototype.forEach.call(document.querySelectorAll('#list .pick input'),function(cb){
+    cb.onchange=function(){
+      var card=cb.closest('.rowcard');
+      card.classList.toggle('off',!cb.checked);
+      var inp=card.querySelector('input:not([type=checkbox])');
+      if(inp)inp.disabled=!cb.checked;
+      sync();
+    };
+    cb.onchange();
+  });
   Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(c){
     c.onclick=function(){
       Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(x){x.classList.remove('active')});
@@ -233,7 +253,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       setTimeout(function(){step=2;mainBtn.disabled=false;render();toast('识别完成，请核对结果')},1200);
       return;
     }
-    var n=document.querySelectorAll('#list .rowcard[data-k="ok"], #list .rowcard[data-k="warn"]').length;
+    var n=picked();
     toast('已导入 '+n+' 项字段');
     setTimeout(function(){Array.prototype.forEach.call(uploader.querySelectorAll('.cell'),function(c){c.remove()});step=1;render()},1600);
   };
