@@ -26,6 +26,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .empty h3{margin:0 0 6px;font-size:16px}
 .empty p{margin:0 0 22px;color:var(--muted);font-size:13px;line-height:1.6}
 .empty-actions{display:flex;flex-direction:column;gap:10px}
+.link-btn{background:none;border:0;color:var(--blue);font-size:13px;padding:10px;margin-top:2px}
 .grid-card{background:#fff;border-radius:var(--radius);padding:14px}
 .uploader{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .cell{position:relative;padding-top:100%;border-radius:8px;background:#eef2f7;overflow:hidden}
@@ -91,6 +92,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
         <button class="btn" id="emptyCamera">拍照上传</button>
         <button class="btn ghost" id="emptyAlbum">从相册选择</button>
       </div>
+      <button class="link-btn" id="demoBtn">跳过上传，用示例图片体验 →</button>
     </div>
     <div class="grid-card hide" id="gridCard">
       <div class="uploader" id="uploader"><div class="up-add" id="addBtn"><i class="van-icon van-icon-photo"></i></div></div>
@@ -174,6 +176,22 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   addBtn.onclick=openSheet;
   document.getElementById('emptyCamera').onclick=function(){camInput.click()};
   document.getElementById('emptyAlbum').onclick=function(){albumInput.click()};
+  var DEMO=[{l:'学生资料'},{l:'家长信息'},{l:'预约记录'}];
+  function demoImg(label){
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><rect width="240" height="240" fill="#dbe7f5"/><text x="120" y="126" font-size="18" fill="#6b7b90" text-anchor="middle">'+label+'</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  function addDemo(){
+    DEMO.slice(0,10-cells()).forEach(function(d){
+      var el=document.createElement('div'); el.className='cell';
+      el.innerHTML='<button class="del">×</button><img alt="" src="'+demoImg(d.l)+'"><div class="bar">待识别</div>';
+      el.querySelector('.del').onclick=function(e){e.stopPropagation();el.remove();sync()};
+      el.addEventListener('click',function(e){if(e.target.classList.contains('del'))return;openViewer(demoImg(d.l))});
+      uploader.insertBefore(el,addBtn);
+    });
+    sync();
+  }
+  document.getElementById('demoBtn').onclick=addDemo;
   mask.onclick=closeSheet;
   Array.prototype.forEach.call(sheet.querySelectorAll('.item'),function(it){
     it.onclick=function(){
@@ -217,7 +235,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     }
     var n=document.querySelectorAll('#list .rowcard[data-k="ok"], #list .rowcard[data-k="warn"]').length;
     toast('已导入 '+n+' 项字段');
-    setTimeout(function(){step=1;render()},1600);
+    setTimeout(function(){Array.prototype.forEach.call(uploader.querySelectorAll('.cell'),function(c){c.remove()});step=1;render()},1600);
   };
   document.getElementById('backBtn').onclick=function(){
     if(step===2){step=1;render()}else{toast('已取消')}
