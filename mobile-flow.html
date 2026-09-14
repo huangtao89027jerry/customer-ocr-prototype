@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>手机端操作流程</title>
+<style>
+:root{--blue:#1677ff;--blue-weak:#e6f4ff;--text:#1f1f1f;--muted:#8c8c8c;--line:#f0f0f0;--bg:#f5f6f8;--green:#52c41a;--orange:#faad14;--radius:12px}
+*{box-sizing:border-box}
+body{margin:0;background:#eef1f5;font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);padding:28px}
+h1{font-size:19px;margin:0 0 6px}
+.sub{color:#8c8c8c;font-size:13px;margin-bottom:22px}
+.flow{display:flex;gap:26px;align-items:flex-start;overflow-x:auto;padding-bottom:18px}
+.wrap{flex:none;width:330px}
+.label{font-size:13px;font-weight:600;margin-bottom:8px;color:#3f3f3f}
+.note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.65}
+.phone{width:330px;height:620px;background:var(--bg);border-radius:20px;border:1px solid #e2e6ec;box-shadow:0 10px 28px #0b1f3a14;overflow:hidden;display:flex;flex-direction:column;position:relative}
+@font-face{font-family:vant-icon;font-style:normal;font-weight:400;src:url('https://at.alicdn.com/t/font_2553510_61agzg96wm8.woff?t=1631948257467') format('woff')}
+.van-icon{font-family:vant-icon!important;font-style:normal;display:inline-block;-webkit-font-smoothing:antialiased;line-height:1}
+.van-icon-photo:before{content:"\e708"}
+.navbar{height:44px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;position:relative;flex:none}
+.navbar .back{position:absolute;left:10px;font-size:18px;color:#595959}
+.steps{display:flex;align-items:center;justify-content:center;padding:8px 10px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;flex:none}
+.step{display:flex;align-items:center;color:#bfbfbf}
+.step .num{width:18px;height:18px;border-radius:50%;background:#f0f0f0;color:#8c8c8c;display:grid;place-items:center;font-size:11px;margin-right:4px}
+.step.active{color:var(--blue)}.step.active .num{background:var(--blue);color:#fff}
+.step.done{color:#595959}.step.done .num{background:var(--blue);color:#fff}
+.conn{width:20px;height:1px;background:#d9d9d9;margin:0 5px}
+.body{flex:1;padding:10px;overflow:hidden;position:relative}
+.actionbar{flex:none;background:#fff;border-top:1px solid var(--line);padding:8px 10px}
+.btn{width:100%;height:40px;border-radius:9px;border:0;font-size:15px;background:var(--blue);color:#fff;font-weight:500}
+.btn.disabled{background:#d9d9d9}
+.btn.ghost{background:#fff;color:#595959;border:1px solid #d9d9d9}
+.empty{background:#fff;border-radius:var(--radius);padding:34px 16px;text-align:center}
+.empty-icon{width:58px;height:58px;border-radius:50%;background:var(--blue-weak);color:var(--blue);display:grid;place-items:center;font-size:26px;margin:0 auto 12px}
+.empty h3{margin:0 0 6px;font-size:15px}
+.empty p{margin:0 0 18px;color:var(--muted);font-size:12.5px;line-height:1.6}
+.empty-actions{display:flex;flex-direction:column;gap:9px}
+.grid-card{background:#fff;border-radius:var(--radius);padding:12px}
+.uploader{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.cell{position:relative;padding-top:100%;border-radius:8px;background:linear-gradient(135deg,#eef3f9,#dbe6f3);overflow:hidden}
+.cell .ph{position:absolute;inset:0;display:grid;place-items:center;color:#6b7b90;font-size:10.5px;text-align:center;padding:6px;line-height:1.4}
+.up-add{position:relative;padding-top:100%;border:1px dashed #bfbfbf;border-radius:8px;background:#fafafa;color:#8c8c8c}
+.up-add i{position:absolute;inset:0;display:grid;place-items:center;font-size:24px}
+.counter{display:flex;justify-content:space-between;margin-top:11px;color:#595959;font-size:12.5px}
+.counter b{color:var(--text)}
+.tip{margin-top:9px;color:var(--muted);font-size:11.5px;line-height:1.6}
+.chips{display:flex;gap:7px;margin:-10px -10px 10px;padding:9px 10px;background:#fff;border-bottom:1px solid var(--line);overflow:hidden}
+.chip{flex:none;padding:5px 11px;border-radius:15px;background:#f5f5f5;color:#595959;font-size:12.5px;white-space:nowrap}
+.chip.active{background:var(--blue);color:#fff}
+.chip b{margin-left:4px;font-weight:500}
+.rowcard{background:#fff;border-radius:var(--radius);padding:12px;margin-bottom:9px}
+.rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:8px}
+.fieldname{font-weight:600;font-size:13.5px}
+.src{color:var(--muted);font-size:12px;margin-bottom:7px}
+.fake-input{height:36px;border:1px solid #d9d9d9;border-radius:8px;display:flex;align-items:center;padding:0 11px;font-size:13.5px;color:var(--text);background:#fff}
+.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11.5px;line-height:19px;border:1px solid transparent;flex:none}
+.tag-ok{color:#389e0d;background:#f6ffed;border-color:#b7eb8f}
+.tag-warn{color:#d48806;background:#fffbe6;border-color:#ffe58f}
+.tag-muted{color:#8c8c8c;background:#fafafa;border-color:#d9d9d9}
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;margin-top:12px}
+.spin{width:14px;height:14px;border:2px solid #d9d9d9;border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);background:#000000cc;color:#fff;padding:9px 16px;border-radius:18px;font-size:13px;white-space:nowrap}
+.dim{opacity:.5}
+</style>
+</head>
+<body>
+<h1>手机端操作流程</h1>
+<div class="sub">共 5 个关键状态。手机端页面本身可以完整操作，这里是把每一步并排铺开对照看。</div>
+<div class="flow">
+
+  <div class="wrap">
+    <div class="label">1 · 空态</div>
+    <div class="phone">
+      <div class="navbar"><span class="back">‹</span>图片识别快速录入</div>
+      <div class="steps"><div class="step active"><span class="num">1</span>上传</div><div class="conn"></div><div class="step"><span class="num">2</span>确认</div></div>
+      <div class="body">
+        <div class="empty">
+          <div class="empty-icon"><i class="van-icon van-icon-photo"></i></div>
+          <h3>拍摄或上传客户资料</h3>
+          <p>支持 JPG、PNG，单张不超过 10MB，最多 10 张<br>建议拍摄清晰、完整、无遮挡的资料照片</p>
+          <div class="empty-actions">
+            <button class="btn">拍照上传</button>
+            <button class="btn ghost">从相册选择</button>
+          </div>
+        </div>
+      </div>
+      <div class="actionbar"><button class="btn disabled">开始识别</button></div>
+    </div>
+    <div class="note">首次进入只有引导，没有图片。主按钮禁用，避免点了没反应。</div>
+  </div>
+
+  <div class="wrap">
+    <div class="label">2 · 已上传</div>
+    <div class="phone">
+      <div class="navbar"><span class="back">‹</span>图片识别快速录入</div>
+      <div class="steps"><div class="step active"><span class="num">1</span>上传</div><div class="conn"></div><div class="step"><span class="num">2</span>确认</div></div>
+      <div class="body">
+        <div class="grid-card">
+          <div class="uploader">
+            <div class="cell"><div class="ph">学生资料<br>姓名/电话</div></div>
+            <div class="cell"><div class="ph">家长信息<br>联系方式</div></div>
+            <div class="cell"><div class="ph">预约记录<br>时间/校区</div></div>
+            <div class="up-add"><i class="van-icon van-icon-photo"></i></div>
+          </div>
+          <div class="counter"><span>已上传 <b>3/10</b> 张</span><span>还可上传 7 张</span></div>
+          <div class="tip">可继续点击 ＋ 添加，或从相册多选</div>
+        </div>
+      </div>
+      <div class="actionbar"><button class="btn">开始识别（3）</button></div>
+    </div>
+    <div class="note">添加入口弱化成最后一个小格；按钮上直接带出数量。</div>
+  </div>
+
+  <div class="wrap">
+    <div class="label">3 · 识别中</div>
+    <div class="phone">
+      <div class="navbar"><span class="back">‹</span>图片识别快速录入</div>
+      <div class="steps"><div class="step active"><span class="num">1</span>上传</div><div class="conn"></div><div class="step"><span class="num">2</span>确认</div></div>
+      <div class="body">
+        <div class="grid-card dim">
+          <div class="uploader">
+            <div class="cell"><div class="ph">学生资料</div></div>
+            <div class="cell"><div class="ph">家长信息</div></div>
+            <div class="cell"><div class="ph">预约记录</div></div>
+          </div>
+          <div class="counter"><span>已上传 <b>3/10</b> 张</span><span>还可上传 7 张</span></div>
+        </div>
+        <div class="loading"><span class="spin"></span>正在识别图片内容…</div>
+      </div>
+      <div class="actionbar"><button class="btn disabled">识别中…</button></div>
+    </div>
+    <div class="note">等待必须有反馈：按钮禁用并显示「识别中…」，内容区顶部提示正在识别。</div>
+  </div>
+
+  <div class="wrap">
+    <div class="label">4 · 识别结果</div>
+    <div class="phone">
+      <div class="navbar"><span class="back">‹</span>识别结果确认</div>
+      <div class="steps"><div class="step done"><span class="num">✓</span>上传</div><div class="conn"></div><div class="step active"><span class="num">2</span>确认</div></div>
+      <div class="body">
+        <div class="chips">
+          <div class="chip active">全部 <b>6</b></div>
+          <div class="chip">可导入 <b>4</b></div>
+          <div class="chip">需确认 <b>1</b></div>
+        </div>
+        <div class="rowcard">
+          <div class="rowhead"><span class="fieldname">姓名</span><span class="tag tag-ok">可导入</span></div>
+          <div class="src">识别内容：张柏</div>
+          <div class="fake-input">张柏</div>
+        </div>
+        <div class="rowcard">
+          <div class="rowhead"><span class="fieldname">预约试听时间</span><span class="tag tag-ok">可导入</span></div>
+          <div class="src">识别内容：下周日 13:00-14:30</div>
+          <div class="fake-input">下周日 13:00-14:30</div>
+        </div>
+        <div class="rowcard">
+          <div class="rowhead"><span class="fieldname">意向课程</span><span class="tag tag-warn">需确认</span></div>
+          <div class="src">识别内容：下周日 13:00-14:30 周磊</div>
+          <div class="fake-input">下周日 13:00-14:30</div>
+        </div>
+      </div>
+      <div class="actionbar"><button class="btn">确认并导入</button></div>
+    </div>
+    <div class="note">手机端不用表格，改成卡片逐条核对；筛选做成横向可滑的胶囊。</div>
+  </div>
+
+  <div class="wrap">
+    <div class="label">5 · 导入反馈</div>
+    <div class="phone">
+      <div class="navbar"><span class="back">‹</span>图片识别快速录入</div>
+      <div class="steps"><div class="step active"><span class="num">1</span>上传</div><div class="conn"></div><div class="step"><span class="num">2</span>确认</div></div>
+      <div class="body">
+        <div class="empty">
+          <div class="empty-icon"><i class="van-icon van-icon-photo"></i></div>
+          <h3>拍摄或上传客户资料</h3>
+          <p>支持 JPG、PNG，单张不超过 10MB，最多 10 张</p>
+          <div class="empty-actions">
+            <button class="btn">拍照上传</button>
+            <button class="btn ghost">从相册选择</button>
+          </div>
+        </div>
+      </div>
+      <div class="actionbar"><button class="btn disabled">开始识别</button></div>
+      <div class="toast">已导入 5 项字段</div>
+    </div>
+    <div class="note">导入完成不单独做一页，直接轻提示告知结果，然后回到上传起点，可以接着拍下一批。</div>
+  </div>
+
+</div>
+</body>
+</html>
