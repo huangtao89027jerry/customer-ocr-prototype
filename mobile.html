@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>图片识别快速录入</title>
 <style>
-:root{--blue:#1677ff;--blue-weak:#e6f4ff;--text:#1f1f1f;--muted:#8c8c8c;--line:#f0f0f0;--bg:#f5f6f8;--green:#52c41a;--orange:#faad14;--radius:10px}
+:root{--blue:#1677ff;--blue-weak:#e6f4ff;--text:#1f1f1f;--muted:#8c8c8c;--line:#f0f0f0;--bg:#f5f6f8;--green:#52c41a;--orange:#faad14;--radius:12px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 @font-face{font-family:vant-icon;font-style:normal;font-weight:400;src:url('https://at.alicdn.com/t/font_2553510_61agzg96wm8.woff?t=1631948257467') format('woff')}
 .van-icon{font-family:vant-icon!important;font-style:normal;display:inline-block;-webkit-font-smoothing:antialiased;line-height:1}
-.van-icon-photo:before{content:"\\e708"}.van-icon-qr:before{content:"\\e709"}.van-icon-add-square:before{content:"\\e65c"}
+.van-icon-photo:before{content:"\e708"}.van-icon-qr:before{content:"\e709"}.van-icon-add-square:before{content:"\e65c"}
 .navbar{position:sticky;top:0;height:46px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;z-index:5}
 .navbar .back{position:absolute;left:6px;top:0;height:46px;display:flex;align-items:center;padding:0 10px;font-size:22px;color:#595959;background:none;border:0;line-height:1}
 .steps{display:flex;align-items:center;justify-content:center;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:13px}
@@ -21,18 +21,24 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .step.done{color:#595959}.step.done .num{background:var(--blue);color:#fff}
 .conn{width:24px;height:1px;background:#d9d9d9;margin:0 6px}
 .page{padding:12px}
-.tip{background:var(--blue-weak);border-radius:8px;color:#595959;font-size:12.5px;padding:10px 12px;line-height:1.6;margin-bottom:12px}
-.card{background:#fff;border-radius:var(--radius);overflow:hidden}
-.uploader{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
+.empty{background:#fff;border-radius:var(--radius);padding:36px 20px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:50%;background:var(--blue-weak);color:var(--blue);display:grid;place-items:center;font-size:30px;margin:0 auto 14px}
+.empty h3{margin:0 0 6px;font-size:16px}
+.empty p{margin:0 0 22px;color:var(--muted);font-size:13px;line-height:1.6}
+.empty-actions{display:flex;flex-direction:column;gap:10px}
+.grid-card{background:#fff;border-radius:var(--radius);padding:14px}
+.uploader{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .cell{position:relative;padding-top:100%;border-radius:8px;background:#eef2f7;overflow:hidden}
 .cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cell .ph{position:absolute;inset:0;display:grid;place-items:center;color:#6b7b90;font-size:11px;text-align:center;padding:8px;line-height:1.4}
 .cell .del{position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:#00000073;color:#fff;border:0;font-size:13px;line-height:1;padding:0;display:grid;place-items:center}
+.cell .bar{position:absolute;left:0;right:0;bottom:0;background:#00000059;color:#fff;font-size:10px;text-align:center;padding:2px 0}
 .up-add{position:relative;padding-top:100%;border:1px dashed #bfbfbf;border-radius:8px;background:#fafafa;color:#8c8c8c}
 .up-add:active{background:#f0f0f0}
 .up-add i{position:absolute;inset:0;display:grid;place-items:center;font-size:26px}
-.counter{padding:0 14px 14px;color:#595959;font-size:13px;display:flex;justify-content:space-between}
+.counter{display:flex;justify-content:space-between;margin-top:12px;color:#595959;font-size:13px}
 .counter b{color:var(--text)}
+.tip{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.6}
 .chips{display:flex;gap:8px;padding:10px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;padding:6px 13px;border-radius:16px;background:#f5f5f5;color:#595959;font-size:13px;white-space:nowrap}
@@ -41,49 +47,55 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .rowcard{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:10px}
 .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
 .fieldname{font-weight:600}
-.src{color:#8c8c8c;font-size:12.5px;margin-bottom:8px;word-break:break-all}
+.src{color:var(--muted);font-size:12.5px;margin-bottom:8px;word-break:break-all}
 .rowcard input{width:100%;height:40px;border:1px solid #d9d9d9;border-radius:8px;padding:0 12px;font-size:15px;outline:none;background:#fff;color:var(--text)}
 .rowcard input:focus{border-color:var(--blue);box-shadow:0 0 0 2px #1677ff1a}
 .tag{display:inline-block;padding:2px 9px;border-radius:4px;font-size:12px;line-height:20px;border:1px solid transparent;flex:none}
 .tag-ok{color:#389e0d;background:#f6ffed;border-color:#b7eb8f}
 .tag-warn{color:#d48806;background:#fffbe6;border-color:#ffe58f}
 .tag-muted{color:#8c8c8c;background:#fafafa;border-color:#d9d9d9}
-.done{text-align:center;padding:56px 20px}
-.done .ok{width:58px;height:58px;border-radius:50%;background:#f6ffed;color:var(--green);display:grid;place-items:center;font-size:30px;margin:0 auto 14px}
-.done h3{margin:0 0 6px;font-size:17px}
-.done p{margin:0;color:#8c8c8c;font-size:13px}
-.actionbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:6}
-.btn{flex:1;height:46px;border-radius:10px;border:0;font-size:16px;background:var(--blue);color:#fff;font-weight:500}
+.btn{width:100%;height:46px;border-radius:10px;border:0;font-size:16px;background:var(--blue);color:#fff;font-weight:500}
 .btn:active{opacity:.85}
 .btn:disabled{background:#d9d9d9}
+.btn.ghost{background:#fff;color:#595959;border:1px solid #d9d9d9}
+.actionbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:6}
 .mask{position:fixed;inset:0;background:#00000073;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 .mask.show{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:#f5f6f8;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .22s ease}
 .sheet.show{transform:translateY(0)}
-.sheet .item{height:52px;display:flex;align-items:center;justify-content:center;background:#fff;font-size:16px;color:var(--text);border-bottom:1px solid var(--line)}
+.sheet .item{height:52px;display:flex;align-items:center;justify-content:center;background:#fff;font-size:16px;color:var(--text);border-bottom:1px solid var(--line);gap:8px}
 .sheet .item:active{background:#f2f2f2}
 .sheet .item.cancel{margin-top:8px;border-bottom:0;color:#595959}
+.viewer{position:fixed;inset:0;background:#000;z-index:30;display:none;align-items:center;justify-content:center}
+.viewer.show{display:flex}
+.viewer img{max-width:100%;max-height:82%;object-fit:contain}
+.viewer .close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:#ffffff26;color:#fff;border:0;font-size:20px;line-height:1}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#000000cc;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;z-index:40;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
 .hide{display:none}
 </style>
 </head>
 <body>
-<header class="navbar"><button class="back">‹</button>图片识别快速录入</header>
-<div class="steps">
+<header class="navbar"><button class="back" id="backBtn">‹</button><span id="navTitle">图片识别快速录入</span></header>
+<div class="steps" id="steps">
   <div class="step active" id="s1"><span class="num">1</span>上传</div><div class="conn"></div>
-  <div class="step" id="s2"><span class="num">2</span>确认</div><div class="conn"></div>
-  <div class="step" id="s3"><span class="num">3</span>完成</div>
+  <div class="step" id="s2"><span class="num">2</span>确认</div>
 </div>
 <main class="page">
   <section id="p1">
-    <div class="tip">支持 JPG、PNG，单张不超过 10MB，最多 10 张。请上传清晰、完整的资料照片。</div>
-    <div class="card">
-      <div class="uploader" id="uploader">
-        <div class="cell"><button class="del">×</button><div class="ph">学生资料<br>姓名/电话</div></div>
-        <div class="cell"><button class="del">×</button><div class="ph">家长信息<br>联系方式</div></div>
-        <div class="cell"><button class="del">×</button><div class="ph">预约记录<br>时间/校区</div></div>
-        <div class="up-add" id="addBtn"><i class="van-icon van-icon-photo"></i></div>
+    <div class="empty" id="emptyState">
+      <div class="empty-icon"><i class="van-icon van-icon-photo"></i></div>
+      <h3>拍摄或上传客户资料</h3>
+      <p>支持 JPG、PNG，单张不超过 10MB，最多 10 张<br>建议拍摄清晰、完整、无遮挡的资料照片</p>
+      <div class="empty-actions">
+        <button class="btn" id="emptyCamera">拍照上传</button>
+        <button class="btn ghost" id="emptyAlbum">从相册选择</button>
       </div>
-      <div class="counter"><span>已上传 <b id="cnt">3/10</b> 张</span><span id="hint">还可上传 7 张</span></div>
+    </div>
+    <div class="grid-card hide" id="gridCard">
+      <div class="uploader" id="uploader"><div class="up-add" id="addBtn"><i class="van-icon van-icon-photo"></i></div></div>
+      <div class="counter"><span>已上传 <b id="cnt">0/10</b> 张</span><span id="hint">还可上传 10 张</span></div>
+      <div class="tip">可继续点击 ＋ 添加，或从相册多选</div>
     </div>
   </section>
 
@@ -101,49 +113,56 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">预约试听时间</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：下周日 13:00-14:30</div><input value="下周日 13:00-14:30"></div>
       <div class="rowcard" data-k="warn"><div class="rowhead"><span class="fieldname">意向课程</span><span class="tag tag-warn">需确认</span></div><div class="src">识别内容：下周日 13:00-14:30 周磊</div><input value="下周日 13:00-14:30"></div>
       <div class="rowcard" data-k="muted"><div class="rowhead"><span class="fieldname">手机号</span><span class="tag tag-muted">无法匹配</span></div><div class="src">识别内容：家长电话号码</div><input placeholder="识别失败"></div>
+      <div class="tip" style="padding:0 4px 8px">修改后的内容会在点击「确认并导入」后回填到客户资料。</div>
     </div>
   </section>
-
-  <section id="p3" class="hide">
-    <div class="card"><div class="done"><div class="ok">✓</div><h3>已导入 4 项字段</h3><p>另有 1 项需确认、1 项无法匹配</p></div></div>
-  </section>
 </main>
-<footer class="actionbar">
-  <button class="btn" id="mainBtn">开始识别</button>
-</footer>
+<footer class="actionbar"><button class="btn" id="mainBtn">开始识别</button></footer>
 <div class="mask" id="mask"></div>
 <div class="sheet" id="sheet">
   <div class="item" data-src="camera">拍照上传</div>
   <div class="item" data-src="album">从相册选择</div>
   <div class="item cancel" data-src="cancel">取消</div>
 </div>
+<div class="viewer" id="viewer"><button class="close" id="viewerClose">×</button><img id="viewerImg" alt=""></div>
+<div class="toast" id="toast"></div>
 <input id="camInput" type="file" accept="image/*" capture="environment" hidden>
 <input id="albumInput" type="file" accept="image/*" multiple hidden>
 <script>
 (function(){
   var step=1,
+      emptyState=document.getElementById('emptyState'), gridCard=document.getElementById('gridCard'),
       uploader=document.getElementById('uploader'), addBtn=document.getElementById('addBtn'),
       camInput=document.getElementById('camInput'), albumInput=document.getElementById('albumInput'),
       cnt=document.getElementById('cnt'), hint=document.getElementById('hint'),
-      mainBtn=document.getElementById('mainBtn'),
-      mask=document.getElementById('mask'), sheet=document.getElementById('sheet');
+      mainBtn=document.getElementById('mainBtn'), navTitle=document.getElementById('navTitle'),
+      mask=document.getElementById('mask'), sheet=document.getElementById('sheet'),
+      viewer=document.getElementById('viewer'), viewerImg=document.getElementById('viewerImg'),
+      toastEl=document.getElementById('toast');
 
   function cells(){return uploader.querySelectorAll('.cell').length}
+  function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._t);toastEl._t=setTimeout(function(){toastEl.classList.remove('show')},1900)}
   function sync(){
     var n=cells();
+    emptyState.classList.toggle('hide',n>0);
+    gridCard.classList.toggle('hide',n===0);
     cnt.textContent=n+'/10';
     hint.textContent=n>=10?'已达上限':'还可上传 '+(10-n)+' 张';
     addBtn.classList.toggle('hide',n>=10);
     mainBtn.disabled=(step===1&&n===0);
+    mainBtn.textContent=step===2?'确认并导入':(n===0?'开始识别':'开始识别（'+n+'）');
   }
+  function openViewer(src){viewerImg.src=src;viewer.classList.add('show')}
+  function closeViewer(){viewer.classList.remove('show')}
   function addFiles(files){
     var room=10-cells();
+    if(files.length>room)toast('最多 10 张，已自动截取');
     Array.prototype.slice.call(files,0,room).forEach(function(f){
       var d=document.createElement('div'); d.className='cell';
-      d.innerHTML='<button class="del">×</button><div class="ph">'+f.name+'</div>';
+      d.innerHTML='<button class="del">×</button><div class="ph">'+f.name+'</div><div class="bar">待识别</div>';
       var img=document.createElement('img'); img.alt='';
       var r=new FileReader();
-      r.onload=function(){img.src=r.result; d.insertBefore(img,d.firstChild)};
+      r.onload=function(){img.src=r.result;d.insertBefore(img,d.firstChild);d.addEventListener('click',function(e){if(e.target.classList.contains('del'))return;openViewer(r.result)})};
       r.readAsDataURL(f);
       d.querySelector('.del').onclick=function(e){e.stopPropagation();d.remove();sync()};
       uploader.insertBefore(d,addBtn);
@@ -153,17 +172,20 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   function openSheet(){mask.classList.add('show');sheet.classList.add('show')}
   function closeSheet(){mask.classList.remove('show');sheet.classList.remove('show')}
   addBtn.onclick=openSheet;
+  document.getElementById('emptyCamera').onclick=function(){camInput.click()};
+  document.getElementById('emptyAlbum').onclick=function(){albumInput.click()};
   mask.onclick=closeSheet;
   Array.prototype.forEach.call(sheet.querySelectorAll('.item'),function(it){
     it.onclick=function(){
-      var s=it.getAttribute('data-src');
-      closeSheet();
+      var s=it.getAttribute('data-src'); closeSheet();
       if(s==='camera')camInput.click();
       else if(s==='album')albumInput.click();
     };
   });
   camInput.onchange=function(){addFiles(camInput.files);camInput.value=''};
   albumInput.onchange=function(){addFiles(albumInput.files);albumInput.value=''};
+  document.getElementById('viewerClose').onclick=closeViewer;
+  viewer.onclick=function(e){if(e.target===viewer)closeViewer()};
 
   Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(c){
     c.onclick=function(){
@@ -177,19 +199,28 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   });
 
   function render(){
-    ['p1','p2','p3'].forEach(function(id,i){document.getElementById(id).classList.toggle('hide',i+1!==step)});
-    ['s1','s2','s3'].forEach(function(id,i){
+    ['p1','p2'].forEach(function(id,i){document.getElementById(id).classList.toggle('hide',i+1!==step)});
+    ['s1','s2'].forEach(function(id,i){
       var el=document.getElementById(id);
       el.className='step '+(i+1===step?'active':i+1<step?'done':'');
       el.querySelector('.num').textContent=i+1<step?'✓':i+1;
     });
-    mainBtn.textContent=step===1?'开始识别':step===2?'确认并导入':'完成';
-    mainBtn.disabled=(step===1&&cells()===0);
+    navTitle.textContent=step===1?'图片识别快速录入':'识别结果确认';
+    sync();
   }
   mainBtn.onclick=function(){
-    if(step===1){step=2}
-    else if(step===2){step=3}
-    render();
+    if(step===1){
+      if(cells()===0)return;
+      mainBtn.disabled=true; mainBtn.textContent='识别中…';
+      setTimeout(function(){step=2;mainBtn.disabled=false;render();toast('识别完成，请核对结果')},1200);
+      return;
+    }
+    var n=document.querySelectorAll('#list .rowcard[data-k="ok"], #list .rowcard[data-k="warn"]').length;
+    toast('已导入 '+n+' 项字段');
+    setTimeout(function(){step=1;render()},1600);
+  };
+  document.getElementById('backBtn').onclick=function(){
+    if(step===2){step=1;render()}else{toast('已取消')}
   };
   render();
 })();
