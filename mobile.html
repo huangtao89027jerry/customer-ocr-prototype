@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>图片识别快速录入</title>
+<style>
+:root{--blue:#1677ff;--blue-weak:#e6f4ff;--text:#1f1f1f;--muted:#8c8c8c;--line:#f0f0f0;--bg:#f5f6f8;--green:#52c41a;--orange:#faad14;--radius:10px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+@font-face{font-family:vant-icon;font-style:normal;font-weight:400;src:url('https://at.alicdn.com/t/font_2553510_61agzg96wm8.woff?t=1631948257467') format('woff')}
+.van-icon{font-family:vant-icon!important;font-style:normal;display:inline-block;-webkit-font-smoothing:antialiased;line-height:1}
+.van-icon-photo:before{content:"\\e708"}.van-icon-qr:before{content:"\\e709"}.van-icon-add-square:before{content:"\\e65c"}
+.navbar{position:sticky;top:0;height:46px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;z-index:5}
+.navbar .back{position:absolute;left:6px;top:0;height:46px;display:flex;align-items:center;padding:0 10px;font-size:22px;color:#595959;background:none;border:0;line-height:1}
+.steps{display:flex;align-items:center;justify-content:center;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:13px}
+.step{display:flex;align-items:center;color:#bfbfbf}
+.step .num{width:20px;height:20px;border-radius:50%;background:#f0f0f0;color:#8c8c8c;display:grid;place-items:center;font-size:12px;margin-right:5px}
+.step.active{color:var(--blue)}.step.active .num{background:var(--blue);color:#fff}
+.step.done{color:#595959}.step.done .num{background:var(--blue);color:#fff}
+.conn{width:24px;height:1px;background:#d9d9d9;margin:0 6px}
+.page{padding:12px}
+.tip{background:var(--blue-weak);border-radius:8px;color:#595959;font-size:12.5px;padding:10px 12px;line-height:1.6;margin-bottom:12px}
+.card{background:#fff;border-radius:var(--radius);overflow:hidden}
+.uploader{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
+.cell{position:relative;padding-top:100%;border-radius:8px;background:#eef2f7;overflow:hidden}
+.cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cell .ph{position:absolute;inset:0;display:grid;place-items:center;color:#6b7b90;font-size:11px;text-align:center;padding:8px;line-height:1.4}
+.cell .del{position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:#00000073;color:#fff;border:0;font-size:13px;line-height:1;padding:0;display:grid;place-items:center}
+.up-add{position:relative;padding-top:100%;border:1px dashed #bfbfbf;border-radius:8px;background:#fafafa;color:#8c8c8c}
+.up-add:active{background:#f0f0f0}
+.up-add i{position:absolute;inset:0;display:grid;place-items:center;font-size:26px}
+.counter{padding:0 14px 14px;color:#595959;font-size:13px;display:flex;justify-content:space-between}
+.counter b{color:var(--text)}
+.chips{display:flex;gap:8px;padding:10px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:6px 13px;border-radius:16px;background:#f5f5f5;color:#595959;font-size:13px;white-space:nowrap}
+.chip.active{background:var(--blue);color:#fff}
+.chip b{margin-left:4px;font-weight:500}
+.rowcard{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+.fieldname{font-weight:600}
+.src{color:#8c8c8c;font-size:12.5px;margin-bottom:8px;word-break:break-all}
+.rowcard input{width:100%;height:40px;border:1px solid #d9d9d9;border-radius:8px;padding:0 12px;font-size:15px;outline:none;background:#fff;color:var(--text)}
+.rowcard input:focus{border-color:var(--blue);box-shadow:0 0 0 2px #1677ff1a}
+.tag{display:inline-block;padding:2px 9px;border-radius:4px;font-size:12px;line-height:20px;border:1px solid transparent;flex:none}
+.tag-ok{color:#389e0d;background:#f6ffed;border-color:#b7eb8f}
+.tag-warn{color:#d48806;background:#fffbe6;border-color:#ffe58f}
+.tag-muted{color:#8c8c8c;background:#fafafa;border-color:#d9d9d9}
+.done{text-align:center;padding:56px 20px}
+.done .ok{width:58px;height:58px;border-radius:50%;background:#f6ffed;color:var(--green);display:grid;place-items:center;font-size:30px;margin:0 auto 14px}
+.done h3{margin:0 0 6px;font-size:17px}
+.done p{margin:0;color:#8c8c8c;font-size:13px}
+.actionbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:6}
+.btn{flex:1;height:46px;border-radius:10px;border:0;font-size:16px;background:var(--blue);color:#fff;font-weight:500}
+.btn:active{opacity:.85}
+.btn:disabled{background:#d9d9d9}
+.mask{position:fixed;inset:0;background:#00000073;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.mask.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:#f5f6f8;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .22s ease}
+.sheet.show{transform:translateY(0)}
+.sheet .item{height:52px;display:flex;align-items:center;justify-content:center;background:#fff;font-size:16px;color:var(--text);border-bottom:1px solid var(--line)}
+.sheet .item:active{background:#f2f2f2}
+.sheet .item.cancel{margin-top:8px;border-bottom:0;color:#595959}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header class="navbar"><button class="back">‹</button>图片识别快速录入</header>
+<div class="steps">
+  <div class="step active" id="s1"><span class="num">1</span>上传</div><div class="conn"></div>
+  <div class="step" id="s2"><span class="num">2</span>确认</div><div class="conn"></div>
+  <div class="step" id="s3"><span class="num">3</span>完成</div>
+</div>
+<main class="page">
+  <section id="p1">
+    <div class="tip">支持 JPG、PNG，单张不超过 10MB，最多 10 张。请上传清晰、完整的资料照片。</div>
+    <div class="card">
+      <div class="uploader" id="uploader">
+        <div class="cell"><button class="del">×</button><div class="ph">学生资料<br>姓名/电话</div></div>
+        <div class="cell"><button class="del">×</button><div class="ph">家长信息<br>联系方式</div></div>
+        <div class="cell"><button class="del">×</button><div class="ph">预约记录<br>时间/校区</div></div>
+        <div class="up-add" id="addBtn"><i class="van-icon van-icon-photo"></i></div>
+      </div>
+      <div class="counter"><span>已上传 <b id="cnt">3/10</b> 张</span><span id="hint">还可上传 7 张</span></div>
+    </div>
+  </section>
+
+  <section id="p2" class="hide">
+    <div class="chips" id="chips">
+      <div class="chip active" data-f="all">全部 <b>6</b></div>
+      <div class="chip" data-f="ok">可导入 <b>4</b></div>
+      <div class="chip" data-f="warn">需确认 <b>1</b></div>
+      <div class="chip" data-f="muted">无法匹配 <b>1</b></div>
+    </div>
+    <div id="list">
+      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">姓名</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：张柏</div><input value="张柏"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">出生日期</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：2010</div><input value="2010-09-20"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">性别</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：女</div><input value="女"></div>
+      <div class="rowcard" data-k="ok"><div class="rowhead"><span class="fieldname">预约试听时间</span><span class="tag tag-ok">可导入</span></div><div class="src">识别内容：下周日 13:00-14:30</div><input value="下周日 13:00-14:30"></div>
+      <div class="rowcard" data-k="warn"><div class="rowhead"><span class="fieldname">意向课程</span><span class="tag tag-warn">需确认</span></div><div class="src">识别内容：下周日 13:00-14:30 周磊</div><input value="下周日 13:00-14:30"></div>
+      <div class="rowcard" data-k="muted"><div class="rowhead"><span class="fieldname">手机号</span><span class="tag tag-muted">无法匹配</span></div><div class="src">识别内容：家长电话号码</div><input placeholder="识别失败"></div>
+    </div>
+  </section>
+
+  <section id="p3" class="hide">
+    <div class="card"><div class="done"><div class="ok">✓</div><h3>已导入 4 项字段</h3><p>另有 1 项需确认、1 项无法匹配</p></div></div>
+  </section>
+</main>
+<footer class="actionbar">
+  <button class="btn" id="mainBtn">开始识别</button>
+</footer>
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet">
+  <div class="item" data-src="camera">拍照上传</div>
+  <div class="item" data-src="album">从相册选择</div>
+  <div class="item cancel" data-src="cancel">取消</div>
+</div>
+<input id="camInput" type="file" accept="image/*" capture="environment" hidden>
+<input id="albumInput" type="file" accept="image/*" multiple hidden>
+<script>
+(function(){
+  var step=1,
+      uploader=document.getElementById('uploader'), addBtn=document.getElementById('addBtn'),
+      camInput=document.getElementById('camInput'), albumInput=document.getElementById('albumInput'),
+      cnt=document.getElementById('cnt'), hint=document.getElementById('hint'),
+      mainBtn=document.getElementById('mainBtn'),
+      mask=document.getElementById('mask'), sheet=document.getElementById('sheet');
+
+  function cells(){return uploader.querySelectorAll('.cell').length}
+  function sync(){
+    var n=cells();
+    cnt.textContent=n+'/10';
+    hint.textContent=n>=10?'已达上限':'还可上传 '+(10-n)+' 张';
+    addBtn.classList.toggle('hide',n>=10);
+    mainBtn.disabled=(step===1&&n===0);
+  }
+  function addFiles(files){
+    var room=10-cells();
+    Array.prototype.slice.call(files,0,room).forEach(function(f){
+      var d=document.createElement('div'); d.className='cell';
+      d.innerHTML='<button class="del">×</button><div class="ph">'+f.name+'</div>';
+      var img=document.createElement('img'); img.alt='';
+      var r=new FileReader();
+      r.onload=function(){img.src=r.result; d.insertBefore(img,d.firstChild)};
+      r.readAsDataURL(f);
+      d.querySelector('.del').onclick=function(e){e.stopPropagation();d.remove();sync()};
+      uploader.insertBefore(d,addBtn);
+    });
+    sync();
+  }
+  function openSheet(){mask.classList.add('show');sheet.classList.add('show')}
+  function closeSheet(){mask.classList.remove('show');sheet.classList.remove('show')}
+  addBtn.onclick=openSheet;
+  mask.onclick=closeSheet;
+  Array.prototype.forEach.call(sheet.querySelectorAll('.item'),function(it){
+    it.onclick=function(){
+      var s=it.getAttribute('data-src');
+      closeSheet();
+      if(s==='camera')camInput.click();
+      else if(s==='album')albumInput.click();
+    };
+  });
+  camInput.onchange=function(){addFiles(camInput.files);camInput.value=''};
+  albumInput.onchange=function(){addFiles(albumInput.files);albumInput.value=''};
+
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(c){
+    c.onclick=function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(x){x.classList.remove('active')});
+      c.classList.add('active');
+      var f=c.getAttribute('data-f');
+      Array.prototype.forEach.call(document.querySelectorAll('#list .rowcard'),function(r){
+        r.classList.toggle('hide',!(f==='all'||r.getAttribute('data-k')===f));
+      });
+    };
+  });
+
+  function render(){
+    ['p1','p2','p3'].forEach(function(id,i){document.getElementById(id).classList.toggle('hide',i+1!==step)});
+    ['s1','s2','s3'].forEach(function(id,i){
+      var el=document.getElementById(id);
+      el.className='step '+(i+1===step?'active':i+1<step?'done':'');
+      el.querySelector('.num').textContent=i+1<step?'✓':i+1;
+    });
+    mainBtn.textContent=step===1?'开始识别':step===2?'确认并导入':'完成';
+    mainBtn.disabled=(step===1&&cells()===0);
+  }
+  mainBtn.onclick=function(){
+    if(step===1){step=2}
+    else if(step===2){step=3}
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
