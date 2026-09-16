@@ -107,15 +107,11 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .entry-title{font-size:20px;font-weight:600;line-height:25px}
 .entry-domain{color:#8c8c8c;font-size:12px;font-weight:400;letter-spacing:.3px}
 .entry-more{position:absolute;right:17px;top:calc(22px + env(safe-area-inset-top));border:0;background:none;font-size:19px;font-weight:700;letter-spacing:3px}
-.entry-tools{height:60px;padding:6px 18px;background:#fff;border-bottom:1px solid #eceef1}
-.recognize-entry{width:100%;height:48px;padding:0 2px;border:0;border-radius:8px;background:#fff;color:#1f1f1f;display:flex;align-items:center;text-align:left}
-.recognize-entry:active{background:#f6f8fb}
-.recognize-icon-wrap{width:28px;height:28px;margin-right:10px;border-radius:7px;background:#eff5fc;color:#6f9fd8;display:grid;place-items:center;flex:none}
-.recognize-icon{position:relative;width:16px;height:14px;border:1.5px solid currentColor;border-radius:2px;display:inline-block}
-.recognize-icon:before{content:"";position:absolute;left:2px;top:2px;width:3px;height:3px;border-radius:50%;background:currentColor}
-.recognize-icon:after{content:"";position:absolute;left:3px;right:2px;bottom:2px;height:5px;border-left:1.5px solid currentColor;border-top:1.5px solid currentColor;transform:skewY(-34deg)}
-.recognize-copy{min-width:0;display:flex;flex:1;flex-direction:column;line-height:1.35}.recognize-copy strong{font-size:15px;font-weight:500;color:#1f1f1f}.recognize-copy small{margin-top:2px;color:#9aa1aa;font-size:12px;font-weight:400}
-.recognize-arrow{margin-left:10px;color:#c6ccd4;font-size:20px;font-weight:300;line-height:1}
+.entry-tools{height:46px;padding:0 18px;background:#fff;border-bottom:1px solid #eceef1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.recognize-hint{color:#9aa1aa;font-size:13px}
+.recognize-entry{display:inline-flex;align-items:center;gap:1px;height:46px;padding:0 0 0 10px;border:0;background:none;color:#2294ed;font-size:13px;font-weight:500;flex:none}
+.recognize-entry:active{opacity:.65}
+.recognize-entry b{color:#9dc4ea;font-size:15px;font-weight:400;line-height:1}
 .entry-form{padding:0 18px;background:#fff}
 .entry-row{width:100%;height:61px;padding:0;border:0;border-bottom:1px solid #eceef1;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left}
 .entry-label{flex:none;font-size:18px}.entry-label i{margin-right:5px;color:#ed6558;font-style:normal}
@@ -138,7 +134,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     <div><div class="entry-title">报名收费</div><div class="entry-domain">predemo.xiaojg.com</div></div>
     <button class="entry-more" type="button" aria-label="更多">•••</button>
   </header>
-  <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button"><span class="recognize-icon-wrap" aria-hidden="true"><span class="recognize-icon"></span></span><span class="recognize-copy"><strong>图片识别录入</strong><small>拍照或选择图片，自动填写客户资料</small></span><span class="recognize-arrow" aria-hidden="true">›</span></button></div>
+  <div class="entry-tools"><span class="recognize-hint">没有照片也能直接填写</span><button class="recognize-entry" id="recognizeEntry" type="button">上传图片识别<b aria-hidden="true">›</b></button></div>
   <div class="entry-form">
     <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-scan" aria-hidden="true"></span><small>身份识别</small></span></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
