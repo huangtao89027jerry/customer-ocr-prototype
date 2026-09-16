@@ -88,9 +88,49 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .done-item:last-child{border-bottom:0}
 .done-item span{color:var(--muted);font-size:13px;text-align:right;word-break:break-all}
 .hide{display:none}
+.entry-page{min-height:100vh;background:#f3f4f7;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.entry-nav{height:86px;padding-top:env(safe-area-inset-top);background:#f2f2f2;border-bottom:1px solid #ededed;position:relative;display:flex;align-items:center;justify-content:center;text-align:center}
+.entry-close{position:absolute;left:18px;top:calc(24px + env(safe-area-inset-top));width:34px;height:34px;padding:0;border:0;background:none;font-size:38px;font-weight:200;line-height:28px;color:#171717}
+.entry-title{font-size:20px;font-weight:600;line-height:25px}
+.entry-domain{color:#8c8c8c;font-size:12px;font-weight:400;letter-spacing:.3px}
+.entry-more{position:absolute;right:17px;top:calc(22px + env(safe-area-inset-top));border:0;background:none;font-size:19px;font-weight:700;letter-spacing:3px}
+.entry-tools{height:48px;padding:0 16px;background:#fff;border-bottom:1px solid #eceef1;display:flex;align-items:center;justify-content:flex-end}
+.recognize-entry{height:34px;padding:0 13px;border:1px solid #91caff;border-radius:7px;background:#e6f4ff;color:#1677ff;font-size:14px;font-weight:500}
+.recognize-entry:before{content:"▣";margin-right:6px;font-size:13px}
+.entry-form{padding:0 18px;background:#fff}
+.entry-row{width:100%;height:61px;padding:0;border:0;border-bottom:1px solid #eceef1;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left}
+.entry-label{flex:none;font-size:18px}.entry-label i{margin-right:5px;color:#ed6558;font-style:normal}
+.entry-row input{min-width:0;width:100%;padding:0;border:0;outline:0;background:transparent;color:#333;font-size:17px;text-align:right}
+.entry-row input::placeholder{color:#c8ccd2}
+.entry-id{display:flex;align-items:center;min-width:0}.entry-id small{flex:none;margin-left:5px;color:#777b82;font-size:13px}
+.entry-camera{position:relative;flex:none;width:17px;height:13px;margin-left:7px;border:2px solid #969ba2;border-radius:2px}
+.entry-camera:before{content:"";position:absolute;left:3px;top:-5px;width:7px;height:4px;border-radius:2px 2px 0 0;background:#969ba2}
+.entry-camera:after{content:"";position:absolute;left:4px;top:2px;width:5px;height:5px;border:1px solid #969ba2;border-radius:50%}
+.entry-account{display:flex;align-items:center;min-width:0}.entry-account b{flex:none;margin-left:6px;color:#60646b;font-size:17px;font-weight:400}
+.entry-campus{color:#60646b;font-size:17px}.entry-arrow{margin-left:4px;color:#bcc1c8;font-size:25px;vertical-align:-2px}
+.entry-more-fields{width:100%;height:70px;margin-top:12px;border:0;background:#fff;color:#3296da;font-size:17px}.entry-more-fields span{margin-left:8px;font-size:23px}
+.entry-actions{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:1fr 1fr;gap:17px;padding:11px 18px calc(11px + env(safe-area-inset-bottom));border-top:1px solid #e7e9ed;background:#fff}
+.entry-actions button{height:48px;border-radius:9px;font-size:18px}.entry-cancel{border:1px solid #dfe2e8;background:#fff}.entry-save{border:0;background:#2294ed;color:#fff}
 </style>
 </head>
 <body>
+<section class="entry-page" id="entryPage">
+  <header class="entry-nav">
+    <button class="entry-close" type="button" aria-label="关闭">×</button>
+    <div><div class="entry-title">报名收费</div><div class="entry-domain">predemo.xiaojg.com</div></div>
+    <button class="entry-more" type="button" aria-label="更多">•••</button>
+  </header>
+  <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button">图片识别</button></div>
+  <div class="entry-form">
+    <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-camera" aria-hidden="true"></span><small>身份识别</small></span></label>
+    <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
+    <label class="entry-row"><span class="entry-label"><i>*</i>师生信账号</span><span class="entry-account"><input type="text" placeholder="请输入"><b>@predemo</b></span></label>
+    <button class="entry-row" type="button"><span class="entry-label"><i>*</i>报名校区</span><span class="entry-campus">星星美术<span class="entry-arrow">›</span></span></button>
+  </div>
+  <button class="entry-more-fields" type="button">填写更多信息 <span>⌄</span></button>
+  <footer class="entry-actions"><button class="entry-cancel" type="button">取消</button><button class="entry-save" type="button">保存</button></footer>
+</section>
+<div id="ocrFlow" class="hide">
 <header class="navbar"><button class="back" id="backBtn">‹</button><span id="navTitle">图片识别快速录入</span></header>
 <div class="steps" id="steps">
   <div class="step active" id="s1"><span class="num">1</span>上传</div><div class="conn"></div>
@@ -149,9 +189,11 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 <div class="toast" id="toast"></div>
 <input id="camInput" type="file" accept="image/*" capture="environment" hidden>
 <input id="albumInput" type="file" accept="image/*" multiple hidden>
+</div>
 <script>
 (function(){
   var step=1,
+      entryPage=document.getElementById('entryPage'), ocrFlow=document.getElementById('ocrFlow'),
       emptyState=document.getElementById('emptyState'), gridCard=document.getElementById('gridCard'),
       uploader=document.getElementById('uploader'), addBtn=document.getElementById('addBtn'),
       camInput=document.getElementById('camInput'), albumInput=document.getElementById('albumInput'),
@@ -160,6 +202,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       mask=document.getElementById('mask'), sheet=document.getElementById('sheet'),
       viewer=document.getElementById('viewer'), viewerImg=document.getElementById('viewerImg'),
       toastEl=document.getElementById('toast');
+
+  document.getElementById('recognizeEntry').onclick=function(){entryPage.classList.add('hide');ocrFlow.classList.remove('hide')};
 
   function cells(){return uploader.querySelectorAll('.cell').length}
   function picked(){return document.querySelectorAll('#list .pick input:checked').length}
@@ -272,7 +316,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   document.getElementById('backBtn').onclick=function(){
     if(step===2){step=1;render()}
     else if(step===3){resetUpload();step=1;render()}
-    else{toast('已取消')}
+    else{ocrFlow.classList.add('hide');entryPage.classList.remove('hide')}
   };
   document.getElementById('totalNum').textContent=document.querySelectorAll('#list .rowcard').length;
   render();
