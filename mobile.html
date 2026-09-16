@@ -107,6 +107,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .recognize-entry b{color:#9dc4ea;font-size:15px;font-weight:400;line-height:1}
 .entry-form{padding:0 18px;background:#fff}
 .entry-row{width:100%;height:61px;padding:0;border:0;border-bottom:1px solid #eceef1;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left}
+@keyframes entryFlash{0%,55%{background:var(--blue-weak)}100%{background:#fff}}
+.entry-row.flash{animation:entryFlash 2.2s ease}
 .entry-label{flex:none;font-size:18px}.entry-label i{margin-right:5px;color:#ed6558;font-style:normal}
 .entry-row input{min-width:0;width:100%;padding:0;border:0;outline:0;background:transparent;color:#333;font-size:17px;text-align:right}
 .entry-row input::placeholder{color:#c8ccd2}
@@ -224,7 +226,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   function cancelRecognizing(){clearTimeout(recognitionTimer);recognitionTimer=null;setRecognizing(false);toast('已取消识别')}
   function resetUpload(){Array.prototype.forEach.call(uploader.querySelectorAll('.cell'),function(c){c.remove()})}
   function fillEntryForm(){
-    var n=0;
+    var filled=[];
     Array.prototype.forEach.call(document.querySelectorAll('#list .rowcard'),function(card){
       var cb=card.querySelector('.pick input');
       if(!cb||!cb.checked)return;
@@ -234,18 +236,29 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       if(!target)return;
       var val=card.querySelector('input:not([type=checkbox])');
       target.value=val?val.value:'';
-      n++;
+      filled.push(row);
     });
-    return n;
+    return filled;
+  }
+  function flashImported(rows){
+    if(!rows.length)return;
+    toast('已导入 '+rows.length+' 项识别数据');
+    Array.prototype.forEach.call(rows,function(row,i){
+      setTimeout(function(){
+        row.classList.add('flash');
+        setTimeout(function(){row.classList.remove('flash')},2300);
+      },i*140);
+    });
+    setTimeout(function(){rows[0].scrollIntoView({behavior:'smooth',block:'center'})},120);
   }
   function backToEntry(){
-    var n=fillEntryForm();
+    var filled=fillEntryForm();
     resetUpload();
     step=1;
     render();
     ocrFlow.classList.add('hide');
     entryPage.classList.remove('hide');
-    toast('已回填 '+n+' 项信息');
+    flashImported(filled);
   }
   function openViewer(src){viewerImg.src=src;viewer.classList.add('show')}
   function closeViewer(){viewer.classList.remove('show')}
