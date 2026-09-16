@@ -87,6 +87,12 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .done-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;border-bottom:1px solid var(--line)}
 .done-item:last-child{border-bottom:0}
 .done-item span{color:var(--muted);font-size:13px;text-align:right;word-break:break-all}
+.recognizing{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;color:var(--muted);font-size:13px}
+.recognizing.hide{display:none}
+.spinner{width:15px;height:15px;border:2px solid #d9d9d9;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.grid-card.is-recognizing{opacity:.5;pointer-events:none}
+.btn.cancel-ocr{border:1px solid #ff7875;background:#fff;color:#f5222d}
 .hide{display:none}
 .entry-page{min-height:100vh;background:#f3f4f7;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .entry-nav{height:86px;padding-top:env(safe-area-inset-top);background:#f2f2f2;border-bottom:1px solid #ededed;position:relative;display:flex;align-items:center;justify-content:center;text-align:center}
@@ -155,6 +161,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       <div class="counter"><span>已上传 <b id="cnt">0/10</b> 张</span><span id="hint">还可上传 10 张</span></div>
       <div class="tip">可继续点击 ＋ 添加，或从相册多选</div>
     </div>
+    <div class="recognizing hide" id="recognizing"><span class="spinner"></span>正在识别图片内容…</div>
   </section>
 
   <section id="p2" class="hide">
@@ -192,13 +199,14 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 </div>
 <script>
 (function(){
-  var step=1,
+  var step=1, recognizingNow=false, recognitionTimer=null,
       entryPage=document.getElementById('entryPage'), ocrFlow=document.getElementById('ocrFlow'),
       emptyState=document.getElementById('emptyState'), gridCard=document.getElementById('gridCard'),
       uploader=document.getElementById('uploader'), addBtn=document.getElementById('addBtn'),
       camInput=document.getElementById('camInput'), albumInput=document.getElementById('albumInput'),
       cnt=document.getElementById('cnt'), hint=document.getElementById('hint'),
       mainBtn=document.getElementById('mainBtn'), navTitle=document.getElementById('navTitle'),
+      recognizing=document.getElementById('recognizing'),
       mask=document.getElementById('mask'), sheet=document.getElementById('sheet'),
       viewer=document.getElementById('viewer'), viewerImg=document.getElementById('viewerImg'),
       toastEl=document.getElementById('toast');
@@ -215,10 +223,14 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     cnt.textContent=n+'/10';
     hint.textContent=n>=10?'已达上限':'还可上传 '+(10-n)+' 张';
     addBtn.classList.toggle('hide',n>=10);
-    if(step===1){mainBtn.disabled=(n===0);mainBtn.textContent=n===0?'开始识别':'开始识别（'+n+'）'}
+    mainBtn.classList.toggle('cancel-ocr',recognizingNow);
+    if(step===1&&recognizingNow){mainBtn.disabled=false;mainBtn.textContent='取消识别'}
+    else if(step===1){mainBtn.disabled=(n===0);mainBtn.textContent=n===0?'开始识别':'开始识别（'+n+'）'}
     else if(step===2){var p=picked();mainBtn.disabled=(p===0);mainBtn.textContent='确认并导入（'+p+'）'}
     else{mainBtn.disabled=false;mainBtn.textContent='完成'}
   }
+  function setRecognizing(on){recognizingNow=on;recognizing.classList.toggle('hide',!on);gridCard.classList.toggle('is-recognizing',on);sync()}
+  function cancelRecognizing(){clearTimeout(recognitionTimer);recognitionTimer=null;setRecognizing(false);toast('已取消识别')}
   function resetUpload(){Array.prototype.forEach.call(uploader.querySelectorAll('.cell'),function(c){c.remove()})}
   function fillDone(){
     var html='',n=0;
@@ -305,16 +317,18 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   }
   mainBtn.onclick=function(){
     if(step===1){
+      if(recognizingNow){cancelRecognizing();return}
       if(cells()===0)return;
-      mainBtn.disabled=true; mainBtn.textContent='识别中…';
-      setTimeout(function(){step=2;mainBtn.disabled=false;render();toast('识别完成，请核对结果')},1200);
+      setRecognizing(true);
+      recognitionTimer=setTimeout(function(){recognitionTimer=null;setRecognizing(false);step=2;render();toast('识别完成，请核对结果')},2200);
       return;
     }
     if(step===2){fillDone();step=3;render();return}
     resetUpload();step=1;render();
   };
   document.getElementById('backBtn').onclick=function(){
-    if(step===2){step=1;render()}
+    if(recognizingNow){cancelRecognizing();ocrFlow.classList.add('hide');entryPage.classList.remove('hide')}
+    else if(step===2){step=1;render()}
     else if(step===3){resetUpload();step=1;render()}
     else{ocrFlow.classList.add('hide');entryPage.classList.remove('hide')}
   };
