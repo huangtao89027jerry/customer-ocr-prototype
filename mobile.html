@@ -122,9 +122,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .entry-row input{min-width:0;width:100%;padding:0;border:0;outline:0;background:transparent;color:#333;font-size:17px;text-align:right}
 .entry-row input::placeholder{color:#c8ccd2}
 .entry-id{display:flex;align-items:center;min-width:0}.entry-id small{flex:none;margin-left:5px;color:#777b82;font-size:13px}
-.entry-camera{position:relative;flex:none;width:17px;height:13px;margin-left:7px;border:2px solid #969ba2;border-radius:2px}
-.entry-camera:before{content:"";position:absolute;left:3px;top:-5px;width:7px;height:4px;border-radius:2px 2px 0 0;background:#969ba2}
-.entry-camera:after{content:"";position:absolute;left:4px;top:2px;width:5px;height:5px;border:1px solid #969ba2;border-radius:50%}
+.entry-scan{position:relative;flex:none;width:18px;height:18px;margin-left:6px;color:#969ba2;background:linear-gradient(currentColor,currentColor) left top/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) left top/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) right top/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) right top/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) left bottom/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) left bottom/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) right bottom/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) right bottom/1.5px 6px no-repeat}
+.entry-scan:after{content:"";position:absolute;left:6px;top:6px;width:6px;height:6px;border:1.5px solid currentColor;border-radius:50%}
 .entry-account{display:flex;align-items:center;min-width:0}.entry-account b{flex:none;margin-left:6px;color:#60646b;font-size:17px;font-weight:400}
 .entry-campus{color:#60646b;font-size:17px}.entry-arrow{margin-left:4px;color:#bcc1c8;font-size:25px;vertical-align:-2px}
 .entry-more-fields{width:100%;height:70px;margin-top:12px;border:0;background:#fff;color:#3296da;font-size:17px}.entry-more-fields span{margin-left:8px;font-size:23px}
@@ -141,7 +140,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   </header>
   <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button"><span class="recognize-icon-wrap" aria-hidden="true"><span class="recognize-icon"></span></span><span class="recognize-copy"><strong>图片识别录入</strong><small>拍照或选择图片，自动填写客户资料</small></span><span class="recognize-arrow" aria-hidden="true">›</span></button></div>
   <div class="entry-form">
-    <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-camera" aria-hidden="true"></span><small>身份识别</small></span></label>
+    <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-scan" aria-hidden="true"></span><small>身份识别</small></span></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>师生信账号</span><span class="entry-account"><input type="text" placeholder="请输入"><b>@predemo</b></span></label>
     <button class="entry-row" type="button"><span class="entry-label"><i>*</i>报名校区</span><span class="entry-campus">星星美术<span class="entry-arrow">›</span></span></button>
