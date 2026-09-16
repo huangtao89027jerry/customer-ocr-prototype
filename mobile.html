@@ -86,14 +86,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .viewer .close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:#ffffff26;color:#fff;border:0;font-size:20px;line-height:1}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#000000cc;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;z-index:40;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
-.result-card{background:#fff;border-radius:var(--radius);padding:30px 18px;text-align:center}
-.ok-icon{width:56px;height:56px;border-radius:50%;background:#f6ffed;color:var(--green);display:grid;place-items:center;font-size:28px;margin:0 auto 14px}
-.result-card h3{margin:0 0 6px;font-size:17px}
-.result-card .desc{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.6}
-.done-list{text-align:left;border-top:1px solid var(--line);padding-top:6px}
-.done-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;border-bottom:1px solid var(--line)}
-.done-item:last-child{border-bottom:0}
-.done-item span{color:var(--muted);font-size:13px;text-align:right;word-break:break-all}
 .recognizing{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;color:var(--muted);font-size:13px}
 .recognizing.hide{display:none}
 .recognize-cancel{padding:13px 8px;margin:-13px -8px;border:0;background:none;color:#2294ed;font-size:13px;line-height:1.4}
@@ -137,9 +129,9 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   </header>
   <div class="entry-tools"><span class="recognize-hint">有资料照片可自动填写</span><button class="recognize-entry" id="recognizeEntry" type="button">图片识别<b aria-hidden="true">›</b></button></div>
   <div class="entry-form">
-    <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-scan" aria-hidden="true"></span><small>身份识别</small></span></label>
-    <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
-    <label class="entry-row"><span class="entry-label"><i>*</i>师生信账号</span><span class="entry-account"><input type="text" placeholder="请输入"><b>@predemo</b></span></label>
+    <label class="entry-row" data-field="姓名"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-scan" aria-hidden="true"></span><small>身份识别</small></span></label>
+    <label class="entry-row" data-field="手机号"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
+    <label class="entry-row" data-field="师生信账号"><span class="entry-label"><i>*</i>师生信账号</span><span class="entry-account"><input type="text" placeholder="请输入"><b>@predemo</b></span></label>
     <button class="entry-row" type="button"><span class="entry-label"><i>*</i>报名校区</span><span class="entry-campus">星星美术<span class="entry-arrow">›</span></span></button>
   </div>
   <button class="entry-more-fields" type="button">填写更多信息 <span>⌄</span></button>
@@ -150,8 +142,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 <div class="steps" id="steps">
   <div class="step active" id="s1"><span class="num">1</span>上传</div><div class="conn"></div>
   <div class="step" id="s2"><span class="num">2</span>确认</div>
-  <div class="conn"></div>
-  <div class="step" id="s3"><span class="num">3</span>完成</div>
 </div>
 <main class="page">
   <section id="p1">
@@ -183,14 +173,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       <div class="rowcard" data-k="warn"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" checked><span class="box"></span></label><span class="fieldname">意向课程</span></div><span class="tag tag-warn">需确认</span></div><div class="src">识别内容：下周日 13:00-14:30 周磊</div><input value="下周日 13:00-14:30"></div>
       <div class="rowcard" data-k="muted"><div class="rowhead"><div class="left"><label class="pick"><input type="checkbox" disabled><span class="box"></span></label><span class="fieldname">手机号</span></div><span class="tag tag-muted">无法匹配</span></div><div class="src">识别内容：家长电话号码</div><input placeholder="识别失败" disabled></div>
       <div class="tip" style="padding:0 4px 8px">修改后的内容会在点击「确认并导入」后回填到客户资料。</div>
-    </div>
-  </section>
-  <section id="p3" class="hide">
-    <div class="result-card">
-      <div class="ok-icon">✓</div>
-      <h3>已导入 <span id="doneNum">5</span> 项字段</h3>
-      <p class="desc">这些信息已写入客户资料，可在电脑端继续编辑。</p>
-      <div class="done-list" id="doneList"></div>
     </div>
   </section>
 </main>
@@ -237,22 +219,33 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     if(step===1&&recognizingNow){mainBtn.disabled=true;mainBtn.textContent='识别中…'}
     else if(step===1){mainBtn.disabled=(n===0);mainBtn.textContent=n===0?'开始识别':'开始识别（'+n+'）'}
     else if(step===2){var p=picked();mainBtn.disabled=(p===0);mainBtn.textContent='确认并导入（'+p+'）'}
-    else{mainBtn.disabled=false;mainBtn.textContent='完成'}
   }
   function setRecognizing(on){recognizingNow=on;recognizing.classList.toggle('hide',!on);gridCard.classList.toggle('is-recognizing',on);sync()}
   function cancelRecognizing(){clearTimeout(recognitionTimer);recognitionTimer=null;setRecognizing(false);toast('已取消识别')}
   function resetUpload(){Array.prototype.forEach.call(uploader.querySelectorAll('.cell'),function(c){c.remove()})}
-  function fillDone(){
-    var html='',n=0;
+  function fillEntryForm(){
+    var n=0;
     Array.prototype.forEach.call(document.querySelectorAll('#list .rowcard'),function(card){
       var cb=card.querySelector('.pick input');
       if(!cb||!cb.checked)return;
-      var inp=card.querySelector('input:not([type=checkbox])');
-      html+='<div class="done-item">'+card.querySelector('.fieldname').textContent+'<span>'+(inp?inp.value:'')+'</span></div>';
+      var name=card.querySelector('.fieldname').textContent.trim();
+      var row=document.querySelector('.entry-form .entry-row[data-field="'+name+'"]');
+      var target=row&&row.querySelector('input');
+      if(!target)return;
+      var val=card.querySelector('input:not([type=checkbox])');
+      target.value=val?val.value:'';
       n++;
     });
-    document.getElementById('doneNum').textContent=n;
-    document.getElementById('doneList').innerHTML=html;
+    return n;
+  }
+  function backToEntry(){
+    var n=fillEntryForm();
+    resetUpload();
+    step=1;
+    render();
+    ocrFlow.classList.add('hide');
+    entryPage.classList.remove('hide');
+    toast('已回填 '+n+' 项信息');
   }
   function openViewer(src){viewerImg.src=src;viewer.classList.add('show')}
   function closeViewer(){viewer.classList.remove('show')}
@@ -317,13 +310,13 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     cb.onchange();
   });
   function render(){
-    ['p1','p2','p3'].forEach(function(id,i){document.getElementById(id).classList.toggle('hide',i+1!==step)});
-    ['s1','s2','s3'].forEach(function(id,i){
+    ['p1','p2'].forEach(function(id,i){document.getElementById(id).classList.toggle('hide',i+1!==step)});
+    ['s1','s2'].forEach(function(id,i){
       var el=document.getElementById(id);
       el.className='step '+(i+1===step?'active':i+1<step?'done':'');
       el.querySelector('.num').textContent=i+1<step?'✓':i+1;
     });
-    navTitle.textContent=step===1?'图片识别快速录入':step===2?'识别结果确认':'导入完成';
+    navTitle.textContent=step===1?'图片识别快速录入':'识别结果确认';
     sync();
   }
   mainBtn.onclick=function(){
@@ -333,13 +326,11 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       recognitionTimer=setTimeout(function(){recognitionTimer=null;setRecognizing(false);step=2;render();toast('识别完成，请核对结果')},2200);
       return;
     }
-    if(step===2){fillDone();step=3;render();return}
-    resetUpload();step=1;render();
+    backToEntry();
   };
   document.getElementById('backBtn').onclick=function(){
     if(recognizingNow){cancelRecognizing();ocrFlow.classList.add('hide');entryPage.classList.remove('hide')}
     else if(step===2){step=1;render()}
-    else if(step===3){resetUpload();step=1;render()}
     else{ocrFlow.classList.add('hide');entryPage.classList.remove('hide')}
   };
   document.getElementById('totalNum').textContent=document.querySelectorAll('#list .rowcard').length;
