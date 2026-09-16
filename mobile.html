@@ -70,9 +70,16 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .mask.show{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:#f5f6f8;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .22s ease}
 .sheet.show{transform:translateY(0)}
-.sheet .item{height:52px;display:flex;align-items:center;justify-content:center;background:#fff;font-size:16px;color:var(--text);border-bottom:1px solid var(--line);gap:8px}
+.sheet-head{height:48px;padding:15px 18px 9px;background:#fff;border-radius:14px 14px 0 0;color:#8c8c8c;font-size:13px}
+.sheet .item{width:100%;height:68px;padding:0 18px;display:flex;align-items:center;background:#fff;color:var(--text);border:0;border-top:1px solid var(--line);text-align:left}
 .sheet .item:active{background:#f2f2f2}
-.sheet .item.cancel{margin-top:8px;border-bottom:0;color:#595959}
+.source-icon{width:38px;height:38px;margin-right:12px;border-radius:9px;background:#e6f4ff;color:#1677ff;display:grid;place-items:center;position:relative;flex:none}
+.source-icon.camera:before{content:"";width:19px;height:14px;border:1.5px solid currentColor;border-radius:3px}
+.source-icon.camera:after{content:"";position:absolute;left:15px;top:14px;width:6px;height:6px;border:1.5px solid currentColor;border-radius:50%}
+.source-icon.album:before{content:"";width:19px;height:17px;border:1.5px solid currentColor;border-radius:3px}
+.source-icon.album:after{content:"";position:absolute;left:12px;bottom:10px;width:12px;height:8px;border-left:1.5px solid currentColor;border-top:1.5px solid currentColor;transform:skewY(-34deg)}
+.source-copy{display:flex;flex-direction:column;line-height:1.35}.source-copy strong{font-size:16px;font-weight:500}.source-copy small{margin-top:3px;color:#8c8c8c;font-size:12px;font-weight:400}
+.sheet .item.cancel{height:54px;margin-top:8px;justify-content:center;border-top:0;color:#595959;text-align:center;font-size:16px}
 .viewer{position:fixed;inset:0;background:#000;z-index:30;display:none;align-items:center;justify-content:center}
 .viewer.show{display:flex}
 .viewer img{max-width:100%;max-height:82%;object-fit:contain}
@@ -100,9 +107,15 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .entry-title{font-size:20px;font-weight:600;line-height:25px}
 .entry-domain{color:#8c8c8c;font-size:12px;font-weight:400;letter-spacing:.3px}
 .entry-more{position:absolute;right:17px;top:calc(22px + env(safe-area-inset-top));border:0;background:none;font-size:19px;font-weight:700;letter-spacing:3px}
-.entry-tools{height:48px;padding:0 16px;background:#fff;border-bottom:1px solid #eceef1;display:flex;align-items:center;justify-content:flex-end}
-.recognize-entry{height:34px;padding:0 13px;border:1px solid #91caff;border-radius:7px;background:#e6f4ff;color:#1677ff;font-size:14px;font-weight:500}
-.recognize-entry:before{content:"▣";margin-right:6px;font-size:13px}
+.entry-tools{height:68px;padding:8px 18px;background:#fff;border-bottom:1px solid #eceef1}
+.recognize-entry{width:100%;height:52px;padding:0 13px;border:1px solid #c7e2ff;border-radius:9px;background:#f2f8ff;color:#1677ff;display:flex;align-items:center;text-align:left}
+.recognize-entry:active{background:#e6f4ff}
+.recognize-icon-wrap{width:34px;height:34px;margin-right:11px;border-radius:8px;background:#dceeff;display:grid;place-items:center;flex:none}
+.recognize-icon{position:relative;width:16px;height:14px;border:1.5px solid currentColor;border-radius:2px;display:inline-block}
+.recognize-icon:before{content:"";position:absolute;left:2px;top:2px;width:3px;height:3px;border-radius:50%;background:currentColor}
+.recognize-icon:after{content:"";position:absolute;left:3px;right:2px;bottom:2px;height:5px;border-left:1.5px solid currentColor;border-top:1.5px solid currentColor;transform:skewY(-34deg)}
+.recognize-copy{min-width:0;display:flex;flex:1;flex-direction:column;line-height:1.35}.recognize-copy strong{font-size:15px;font-weight:500}.recognize-copy small{margin-top:2px;color:#6f8dab;font-size:12px;font-weight:400}
+.recognize-arrow{margin-left:10px;color:#7fb8ee;font-size:22px;font-weight:300;line-height:1}
 .entry-form{padding:0 18px;background:#fff}
 .entry-row{width:100%;height:61px;padding:0;border:0;border-bottom:1px solid #eceef1;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left}
 .entry-label{flex:none;font-size:18px}.entry-label i{margin-right:5px;color:#ed6558;font-style:normal}
@@ -126,7 +139,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     <div><div class="entry-title">报名收费</div><div class="entry-domain">predemo.xiaojg.com</div></div>
     <button class="entry-more" type="button" aria-label="更多">•••</button>
   </header>
-  <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button">图片识别</button></div>
+  <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button"><span class="recognize-icon-wrap" aria-hidden="true"><span class="recognize-icon"></span></span><span class="recognize-copy"><strong>图片识别录入</strong><small>拍照或选择图片，自动填写客户资料</small></span><span class="recognize-arrow" aria-hidden="true">›</span></button></div>
   <div class="entry-form">
     <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-camera" aria-hidden="true"></span><small>身份识别</small></span></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
@@ -188,10 +201,11 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 <footer class="actionbar"><button class="btn" id="mainBtn">开始识别</button></footer>
 </div>
 <div class="mask" id="mask"></div>
-<div class="sheet" id="sheet">
-  <div class="item" data-src="camera">拍照上传</div>
-  <div class="item" data-src="album">从相册选择</div>
-  <div class="item cancel" data-src="cancel">取消</div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="选择图片来源">
+  <div class="sheet-head">选择图片来源</div>
+  <button class="item" type="button" data-src="camera"><span class="source-icon camera" aria-hidden="true"></span><span class="source-copy"><strong>拍照上传</strong><small>使用手机相机拍摄客户资料</small></span></button>
+  <button class="item" type="button" data-src="album"><span class="source-icon album" aria-hidden="true"></span><span class="source-copy"><strong>从相册选择</strong><small>支持一次选择多张图片</small></span></button>
+  <button class="item cancel" type="button" data-src="cancel">取消</button>
 </div>
 <div class="viewer" id="viewer"><button class="close" id="viewerClose">×</button><img id="viewerImg" alt=""></div>
 <div class="toast" id="toast"></div>
