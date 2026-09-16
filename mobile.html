@@ -96,10 +96,11 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .done-item span{color:var(--muted);font-size:13px;text-align:right;word-break:break-all}
 .recognizing{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;color:var(--muted);font-size:13px}
 .recognizing.hide{display:none}
+.recognize-cancel{padding:13px 8px;margin:-13px -8px;border:0;background:none;color:#2294ed;font-size:13px;line-height:1.4}
+.recognize-cancel:active{opacity:.6}
 .spinner{width:15px;height:15px;border:2px solid #d9d9d9;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .grid-card.is-recognizing{opacity:.5;pointer-events:none}
-.btn.cancel-ocr{border:1px solid #ff7875;background:#fff;color:#f5222d}
 .hide{display:none}
 .entry-page{min-height:100vh;background:#f3f4f7;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .entry-nav{height:86px;padding-top:env(safe-area-inset-top);background:#f2f2f2;border-bottom:1px solid #ededed;position:relative;display:flex;align-items:center;justify-content:center;text-align:center}
@@ -169,7 +170,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       <div class="counter"><span>已上传 <b id="cnt">0/10</b> 张</span><span id="hint">还可上传 10 张</span></div>
       <div class="tip">可继续点击 ＋ 添加，或从相册多选</div>
     </div>
-    <div class="recognizing hide" id="recognizing"><span class="spinner"></span>正在识别图片内容…</div>
+    <div class="recognizing hide" id="recognizing"><span class="spinner"></span>正在识别图片内容…<button class="recognize-cancel" id="cancelRecognize" type="button">取消</button></div>
   </section>
 
   <section id="p2" class="hide">
@@ -221,6 +222,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       toastEl=document.getElementById('toast');
 
   document.getElementById('recognizeEntry').onclick=openSheet;
+  document.getElementById('cancelRecognize').onclick=cancelRecognizing;
 
   function cells(){return uploader.querySelectorAll('.cell').length}
   function picked(){return document.querySelectorAll('#list .pick input:checked').length}
@@ -232,8 +234,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     cnt.textContent=n+'/10';
     hint.textContent=n>=10?'已达上限':'还可上传 '+(10-n)+' 张';
     addBtn.classList.toggle('hide',n>=10);
-    mainBtn.classList.toggle('cancel-ocr',recognizingNow);
-    if(step===1&&recognizingNow){mainBtn.disabled=false;mainBtn.textContent='取消识别'}
+    if(step===1&&recognizingNow){mainBtn.disabled=true;mainBtn.textContent='识别中…'}
     else if(step===1){mainBtn.disabled=(n===0);mainBtn.textContent=n===0?'开始识别':'开始识别（'+n+'）'}
     else if(step===2){var p=picked();mainBtn.disabled=(p===0);mainBtn.textContent='确认并导入（'+p+'）'}
     else{mainBtn.disabled=false;mainBtn.textContent='完成'}
@@ -327,7 +328,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   }
   mainBtn.onclick=function(){
     if(step===1){
-      if(recognizingNow){cancelRecognizing();return}
       if(cells()===0)return;
       setRecognizing(true);
       recognitionTimer=setTimeout(function(){recognitionTimer=null;setRecognizing(false);step=2;render();toast('识别完成，请核对结果')},2200);
