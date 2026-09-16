@@ -186,6 +186,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   </section>
 </main>
 <footer class="actionbar"><button class="btn" id="mainBtn">开始识别</button></footer>
+</div>
 <div class="mask" id="mask"></div>
 <div class="sheet" id="sheet">
   <div class="item" data-src="camera">拍照上传</div>
@@ -196,7 +197,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 <div class="toast" id="toast"></div>
 <input id="camInput" type="file" accept="image/*" capture="environment" hidden>
 <input id="albumInput" type="file" accept="image/*" multiple hidden>
-</div>
 <script>
 (function(){
   var step=1, recognizingNow=false, recognitionTimer=null,
@@ -211,7 +211,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       viewer=document.getElementById('viewer'), viewerImg=document.getElementById('viewerImg'),
       toastEl=document.getElementById('toast');
 
-  document.getElementById('recognizeEntry').onclick=function(){entryPage.classList.add('hide');ocrFlow.classList.remove('hide')};
+  document.getElementById('recognizeEntry').onclick=openSheet;
 
   function cells(){return uploader.querySelectorAll('.cell').length}
   function picked(){return document.querySelectorAll('#list .pick input:checked').length}
@@ -263,6 +263,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
   }
   function openSheet(){mask.classList.add('show');sheet.classList.add('show')}
   function closeSheet(){mask.classList.remove('show');sheet.classList.remove('show')}
+  function enterFlow(){entryPage.classList.add('hide');ocrFlow.classList.remove('hide')}
   addBtn.onclick=openSheet;
   document.getElementById('emptyCamera').onclick=function(){camInput.click()};
   document.getElementById('emptyAlbum').onclick=function(){albumInput.click()};
@@ -290,8 +291,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
       else if(s==='album')albumInput.click();
     };
   });
-  camInput.onchange=function(){addFiles(camInput.files);camInput.value=''};
-  albumInput.onchange=function(){addFiles(albumInput.files);albumInput.value=''};
+  camInput.onchange=function(){if(camInput.files.length){enterFlow();addFiles(camInput.files)}camInput.value=''};
+  albumInput.onchange=function(){if(albumInput.files.length){enterFlow();addFiles(albumInput.files)}albumInput.value=''};
   document.getElementById('viewerClose').onclick=closeViewer;
   viewer.onclick=function(e){if(e.target===viewer)closeViewer()};
 
