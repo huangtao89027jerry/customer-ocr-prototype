@@ -107,10 +107,6 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .entry-title{font-size:20px;font-weight:600;line-height:25px}
 .entry-domain{color:#8c8c8c;font-size:12px;font-weight:400;letter-spacing:.3px}
 .entry-more{position:absolute;right:17px;top:calc(22px + env(safe-area-inset-top));border:0;background:none;font-size:19px;font-weight:700;letter-spacing:3px}
-.entry-tools{height:46px;padding:0 18px;background:#fff;border-bottom:1px solid #eceef1;display:flex;align-items:center}
-.recognize-entry{width:100%;height:46px;padding:0;border:0;background:none;color:#2294ed;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
-.recognize-entry:active{opacity:.65}
-.recognize-entry b{color:#9dc4ea;font-size:15px;font-weight:400;line-height:1}
 .entry-form{padding:0 18px;background:#fff}
 .entry-row{width:100%;height:61px;padding:0;border:0;border-bottom:1px solid #eceef1;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left}
 .entry-label{flex:none;font-size:18px}.entry-label i{margin-right:5px;color:#ed6558;font-style:normal}
@@ -120,7 +116,7 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
 .entry-scan{position:relative;flex:none;width:18px;height:18px;margin-left:6px;color:#969ba2;background:linear-gradient(currentColor,currentColor) left top/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) left top/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) right top/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) right top/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) left bottom/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) left bottom/1.5px 6px no-repeat,linear-gradient(currentColor,currentColor) right bottom/6px 1.5px no-repeat,linear-gradient(currentColor,currentColor) right bottom/1.5px 6px no-repeat}
 .entry-scan:after{content:"";position:absolute;left:6px;top:6px;width:6px;height:6px;border:1.5px solid currentColor;border-radius:50%}
 .entry-account{display:flex;align-items:center;min-width:0}.entry-account b{flex:none;margin-left:6px;color:#60646b;font-size:17px;font-weight:400}
-.entry-campus{color:#60646b;font-size:17px}.entry-arrow{margin-left:4px;color:#bcc1c8;font-size:25px;vertical-align:-2px}
+.entry-campus,.entry-recognize{color:#60646b;font-size:17px}.entry-arrow{margin-left:4px;color:#bcc1c8;font-size:25px;vertical-align:-2px}
 .entry-more-fields{width:100%;height:70px;margin-top:12px;border:0;background:#fff;color:#3296da;font-size:17px}.entry-more-fields span{margin-left:8px;font-size:23px}
 .entry-actions{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:1fr 1fr;gap:17px;padding:11px 18px calc(11px + env(safe-area-inset-bottom));border-top:1px solid #e7e9ed;background:#fff}
 .entry-actions button{height:48px;border-radius:9px;font-size:18px}.entry-cancel{border:1px solid #dfe2e8;background:#fff}.entry-save{border:0;background:#2294ed;color:#fff}
@@ -133,8 +129,8 @@ body{background:var(--bg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFa
     <div><div class="entry-title">报名收费</div><div class="entry-domain">predemo.xiaojg.com</div></div>
     <button class="entry-more" type="button" aria-label="更多">•••</button>
   </header>
-  <div class="entry-tools"><button class="recognize-entry" id="recognizeEntry" type="button">你可以选择照片直接录入<b aria-hidden="true">›</b></button></div>
   <div class="entry-form">
+    <button class="entry-row" id="recognizeEntry" type="button"><span class="entry-label">图片录入</span><span class="entry-recognize">拍照或上传资料<span class="entry-arrow">›</span></span></button>
     <label class="entry-row"><span class="entry-label"><i>*</i>姓名</span><span class="entry-id"><input type="text" placeholder="请输入"><span class="entry-scan" aria-hidden="true"></span><small>身份识别</small></span></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>手机号</span><input type="tel" inputmode="numeric" placeholder="请输入"></label>
     <label class="entry-row"><span class="entry-label"><i>*</i>师生信账号</span><span class="entry-account"><input type="text" placeholder="请输入"><b>@predemo</b></span></label>
