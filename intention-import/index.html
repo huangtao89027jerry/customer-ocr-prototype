@@ -657,6 +657,12 @@
   document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setTab(tab.dataset.tab)));
   document.getElementById('closeDrawer').addEventListener('click', () => mask.classList.add('hidden'));
   mask.addEventListener('click', e => { if(e.target === mask) mask.classList.add('hidden'); });
+  // 列表上的「处理异常」直接打开抽屉，不走 hash（hash 没变化时点击不会触发任何事件）
+  document.getElementById('recLink').addEventListener('click', e => {
+    e.preventDefault();
+    render();
+    mask.classList.remove('hidden');
+  });
 
   // 静态稿锚点：#rep 疑似重复、#err 数据异常、#list 只看导入记录、#done 全部处理完的完成态
   function applyHash(){
