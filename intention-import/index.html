@@ -488,6 +488,8 @@
   }
 
   function render(){
+    // 处理完的页签不再占位：自动切到还有数据的那个，两个都处理完就整块收起来
+    if(!ROWS[active].length && ROWS[active === 'rep' ? 'err' : 'rep'].length) active = active === 'rep' ? 'err' : 'rep';
     const list = ROWS[active];
     const done = pending() === 0;
 
@@ -505,16 +507,20 @@
         <td class="act"><button class="link-btn import-one" data-i="${i}">导入</button></td>
       </tr>`).join('');
 
-    // 页签空了以后的完成提示
+    // 全部处理完以后，整块换成完成提示
     const empty = document.getElementById('sheetEmpty');
     empty.classList.toggle('show', !list.length);
     if(!list.length){
-      const other = active === 'rep' ? 'err' : 'rep';
-      document.getElementById('emptyTitle').textContent = done ? '本次导入已全部处理完成' : `${TYPE_NAME[active]}已全部处理完成`;
-      document.getElementById('emptyTip').textContent = done
-        ? `${TOTAL} 条数据已全部入库，可以关闭本页了`
-        : `还剩 ${ROWS[other].length} 条${TYPE_NAME[other]}，切到另一个页签继续处理`;
+      document.getElementById('emptyTitle').textContent = '本次导入已全部处理完成';
+      document.getElementById('emptyTip').textContent = `${TOTAL} 条数据已全部入库，可以关闭本页了`;
     }
+
+    // 页签只显示还有数据的；都处理完就连同工具条一起收起来
+    document.querySelectorAll('.tab').forEach(t => {
+      t.style.display = ROWS[t.dataset.tab].length ? '' : 'none';
+      t.classList.toggle('active', t.dataset.tab === active);
+    });
+    document.querySelector('.toolbar').style.display = done ? 'none' : '';
 
     // 顶部结果概览（跟着处理进度走）
     document.querySelectorAll('.js-cnt-rep').forEach(el => el.textContent = ROWS.rep.length);
@@ -535,7 +541,6 @@
     document.getElementById('tabDesc').textContent = active === 'rep'
       ? '姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入。'
       : '字段不符合规则（必填为空、格式不对、与已有学员重复），改好后点“导入”重新校验这一条。';
-    document.querySelector('.tab-desc').style.visibility = list.length ? 'visible' : 'hidden';
 
     // 底部操作条
     const left = list.length;
@@ -561,13 +566,20 @@
     setTimeout(() => el.remove(), 2400);
   }
 
+  // 页签处理完时在提示里说一句，用户才知道页签为什么消失了
+  function doneToast(base){
+    return pending() ? `${base}，${TYPE_NAME[active]}已全部处理完成`
+      : `${base}，本次导入全部完成（共 ${TOTAL} 条）`;
+  }
+
   function importOne(i){
     const list = ROWS[active];
     const row = list[i];
     if(!row) return;
     if(active === 'rep'){                       // 疑似重复：确认为新学员后直接导入
       list.splice(i, 1); success++;
-      render(); toast('已作为新学员导入 1 条', 'ok');
+      const msg = doneToast('已作为新学员导入 1 条');
+      render(); toast(msg, 'ok');
       return;
     }
     const {issues, msgs} = validate(row);
@@ -580,8 +592,9 @@
       return;
     }
     list.splice(i, 1); success++;
+    const msg = doneToast('已导入 1 条');
     render();
-    toast(pending() ? '已导入 1 条' : `已导入 1 条，本次导入全部完成（共 ${TOTAL} 条）`, 'ok');
+    toast(msg, 'ok');
   }
 
   function batchImport(){
@@ -590,7 +603,8 @@
     if(active === 'rep'){
       const n = list.length;
       list.length = 0; success += n;
-      render(); toast(`已把 ${n} 条疑似重复数据作为新学员导入，本次导入全部完成`, 'ok');
+      const msg = `已把 ${n} 条疑似重复数据作为新学员导入` + (pending() ? `，还剩 ${pending()} 条数据异常` : '，本次导入全部完成');
+      render(); toast(msg, 'ok');
       return;
     }
     let ok = 0, fail = 0;
@@ -600,7 +614,7 @@
       else { list.splice(i, 1); ok++; success++; }
     }
     render();
-    if(ok && !fail) toast(`成功导入 ${ok} 条${pending() ? '' : '，本次导入全部完成'}`, 'ok');
+    if(ok && !fail) toast(`成功导入 ${ok} 条${pending() ? '，数据异常已全部处理完成' : '，本次导入全部完成'}`, 'ok');
     else if(ok) toast(`成功导入 ${ok} 条，${fail} 条仍需修改`, 'bad');
     else toast(`${fail} 条仍未通过校验，请按“异常原因”修改后再导入`, 'bad');
   }
