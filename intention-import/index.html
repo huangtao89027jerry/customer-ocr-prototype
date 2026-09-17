@@ -90,7 +90,7 @@
   .drawer-head h2{margin:0;font-size:19px;font-weight:700}
   .drawer-head .close{margin-left:auto;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:#7d8795;font-size:24px;line-height:1}
   .drawer-head .close:hover{background:#f1f4f8}
-  .drawer-body{flex:1;min-height:0;overflow:auto;padding:16px 22px 18px}
+  .drawer-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:16px 22px 18px}
 
   /* ---------- 本次导入结果（重做重点） ---------- */
   .result{background:#fff;border:1px solid #dbe9fb;border-radius:12px;box-shadow:var(--shadow);padding:14px 18px;margin-bottom:14px}
@@ -135,8 +135,8 @@
   .fill-guide ul{margin:0;padding-left:16px}
 
   /* ---------- 表格 ---------- */
-  /* 高度固定而不是被内容撑开：表格框稳定，横向滚动条也落在卡片底部 */
-  .sheet-wrap{border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff;height:calc(100vh - 470px);min-height:320px}
+  /* 用弹性撑满剩余高度：表格框稳定、横向滚动条落在卡片底部，且不会被上方内容顶出可视区 */
+  .sheet-wrap{flex:1 1 auto;min-height:240px;border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff}
   table.sheet{border-collapse:separate;border-spacing:0;table-layout:fixed;width:100%;min-width:2122px}
   table.sheet th,table.sheet td{border-right:1px solid #eef1f6;border-bottom:1px solid #eef1f6;height:46px;padding:0;background:#fff;vertical-align:middle}
   table.sheet th{height:44px;background:#f8fafc;color:#788394;font-weight:500;text-align:left;padding:0 10px;font-size:13px;
