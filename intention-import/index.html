@@ -120,10 +120,12 @@
   .tab{border:0;background:transparent;height:46px;padding:0 4px;color:#5d6879;font-size:15px;position:relative}
   .tab.active{color:var(--blue);font-weight:600}
   .tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--blue);border-radius:3px 3px 0 0}
+  .tab-tip{display:flex;align-items:center;gap:6px;min-width:0;color:#98a2b3;font-size:12px;padding-bottom:16px}
+  .tab-tip #tabDesc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tip-bulb{display:inline-flex;width:15px;height:15px;flex:0 0 15px;color:#e6a23c}
+  .tip-bulb svg{display:block;width:15px;height:15px;stroke:currentColor}
   .tabs-row .spacer{flex:1}
-  .tabs-row .tools{display:flex;gap:10px;padding-bottom:10px}
-  .tab-desc{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:10px 2px 0;color:#8b95a6;font-size:12px}
-  .tab-desc .desc-hint{color:#a6b0be;white-space:nowrap}
+  .tabs-row .tools{display:flex;align-items:center;gap:14px;padding-bottom:12px}
   .guide-wrap{position:relative}
   .fill-guide{display:none;position:absolute;right:0;top:38px;width:330px;background:#fff;border:1px solid #dce3ed;border-radius:9px;
     padding:12px 14px;color:#5e6977;font-size:12px;line-height:1.9;z-index:40;box-shadow:0 10px 28px rgba(25,56,99,.14)}
@@ -163,7 +165,7 @@
   table.sheet tr.row-ok:hover td{background:#f7fcf9}
   .imported{color:var(--green);font-size:13px;font-weight:600;white-space:nowrap}
   .show-done{display:inline-flex;align-items:center;gap:6px;color:#8b95a6;font-size:12px;cursor:pointer;
-    align-self:flex-end;padding-bottom:15px;white-space:nowrap}
+    align-self:flex-end;padding-bottom:16px;white-space:nowrap}
   .show-done input{width:14px;height:14px;margin:0;accent-color:var(--blue);cursor:pointer}
   .show-done.hide{display:none}
 
@@ -347,14 +349,18 @@
         <div class="tabs-row">
           <button class="tab active" data-tab="rep">疑似重复（<span class="js-cnt-rep">8</span>）</button>
           <button class="tab" data-tab="err">数据异常（<span class="js-cnt-err">13</span>）</button>
+          <span class="tab-tip">
+            <span class="tip-bulb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.2 14.5A7 7 0 1 1 15.8 14.5c-.8.7-1.2 1.5-1.3 2.5h-5c-.1-1-.5-1.8-1.3-2.5Z"/></svg></span>
+            <span id="tabDesc">姓名或手机号与系统里已有学员相同，需要核对后确认是否当作新学员导入</span>
+          </span>
+          <span class="spacer"></span>
           <label class="show-done hide" id="showDoneWrap">
             <input type="checkbox" id="showDone" checked>
             <span id="showDoneText">包含已处理成功的数据</span>
           </label>
-          <span class="spacer"></span>
           <div class="tools">
             <div class="guide-wrap">
-              <button class="btn small" id="guideBtn">填写说明</button>
+              <button class="link-btn" id="guideBtn">填写说明</button>
               <div class="fill-guide" id="fillGuide">
                 <ul>
                   <li>带 <span class="req">*</span> 的字段为必填项</li>
@@ -366,10 +372,6 @@
             </div>
             <button class="btn small">下载异常数据</button>
           </div>
-        </div>
-        <div class="tab-desc">
-          <span id="tabDesc">姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入。</span>
-          <span class="desc-hint">表格可直接修改</span>
         </div>
       </div>
 
@@ -573,8 +575,8 @@
 
     // 页签下面的那行说明，跟着当前页签走（不再单独占两块卡片）
     document.getElementById('tabDesc').textContent = active === 'rep'
-      ? '姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入。'
-      : '字段不符合规则（必填为空、格式不对、与已有学员重复），改好后点“导入”重新校验这一条。';
+      ? '姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入'
+      : '字段不符合规则（必填为空、格式不对、与已有学员重复），改好后点“导入”重新校验这一条';
 
     // 底部操作条
     const left = list.length;
