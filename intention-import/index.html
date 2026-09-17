@@ -114,29 +114,25 @@
   .bar i{display:block;height:100%}
   .bar .ok{background:var(--green);width:16%}
   .bar .wait{background:#ffb77a;width:84%}
-  .bar-legend{display:flex;gap:18px;margin-top:9px;color:var(--muted);font-size:12px}
-  .bar-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
-
-  .reasons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-  .reason{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
-  .reason-head{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
-  .reason-head b{font-size:15px}
-  .reason-head .count{font-size:20px;font-weight:750}
-  .reason p{margin:0;color:#657184;font-size:13px;line-height:1.7}
-  .reason.rep{border-left:3px solid #ffb77a}
-  .reason.rep .count{color:#e8862f}
-  .reason.err{border-left:3px solid #f79b9b}
-  .reason.err .count{color:#e05555}
   .reason-foot{margin:13px 0 0;color:var(--muted);font-size:12px}
 
   /* ---------- 页签 + 工具条 ---------- */
-  .toolbar{display:flex;align-items:flex-end;gap:22px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .toolbar{border-bottom:1px solid var(--line);margin-bottom:12px}
+  .tabs-row{display:flex;align-items:flex-end;gap:22px}
   .tab{border:0;background:transparent;height:46px;padding:0 4px;color:#5d6879;font-size:15px;position:relative}
   .tab.active{color:var(--blue);font-weight:600}
   .tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--blue);border-radius:3px 3px 0 0}
-  .toolbar .spacer{flex:1}
-  .tip{display:flex;align-items:center;gap:6px;color:#98a2b3;font-size:12px;padding-bottom:14px}
-  .toolbar .tools{display:flex;gap:10px;padding-bottom:10px}
+  .tabs-row .spacer{flex:1}
+  .tabs-row .tools{display:flex;gap:10px;padding-bottom:10px}
+  .tab-desc{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:10px 2px 0;color:#8b95a6;font-size:12px}
+  .tab-desc .desc-hint{color:#a6b0be;white-space:nowrap}
+  .guide-wrap{position:relative}
+  .fill-guide{display:none;position:absolute;right:0;top:38px;width:330px;background:#fff;border:1px solid #dce3ed;border-radius:9px;
+    padding:12px 14px;color:#5e6977;font-size:12px;line-height:1.9;z-index:40;box-shadow:0 10px 28px rgba(25,56,99,.14)}
+  .fill-guide.show{display:block}
+  .fill-guide:before{content:"";position:absolute;right:22px;top:-6px;width:10px;height:10px;background:#fff;
+    border-left:1px solid #dce3ed;border-top:1px solid #dce3ed;transform:rotate(45deg)}
+  .fill-guide ul{margin:0;padding-left:16px}
 
   /* ---------- 表格 ---------- */
   .sheet-wrap{border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff;max-height:calc(100vh - 470px);min-height:300px}
@@ -318,7 +314,7 @@
         <div class="result-head">
           <span class="result-icon" id="resultIcon">!</span>
           <div>
-            <h3 id="resultTitle">本次导入 25 条，其中 <b>21 条需要你处理</b></h3>
+            <h3 id="resultTitle">还有 <b>21 条</b>数据需要你处理</h3>
             <p class="meta">意向客户导入模板_202609041012.xlsx · 2026-09-04 10:19:33 · 内置管理员</p>
           </div>
         </div>
@@ -331,38 +327,37 @@
           <div class="flow-node wait"><b id="statWait">21</b><span>待处理</span></div>
         </div>
         <div class="bar"><i class="ok" id="barOk"></i><i class="wait" id="barWait"></i></div>
-        <div class="bar-legend">
-          <span><i style="background:var(--green)"></i>已成功入库 <b id="legendOk">4</b> 条</span>
-          <span><i style="background:#ffb77a"></i>待处理 <b id="legendWait">21</b> 条</span>
-        </div>
-
-        <div class="reasons" id="reasons">
-          <div class="reason rep">
-            <div class="reason-head"><b>疑似重复</b><span class="count js-cnt-rep">8</span><span>条</span></div>
-            <p>系统里可能已经有同一个学员（姓名或手机号相同），需要你核对后确认是否当作新学员导入。</p>
-          </div>
-          <div class="reason err">
-            <div class="reason-head"><b>数据异常</b><span class="count js-cnt-err">13</span><span>条</span></div>
-            <p>表格里有字段不符合规则，例如手机号格式不对、必填项为空、与已有学员重复，需要修改后重新导入。</p>
-          </div>
-        </div>
-
         <div class="done-line" id="doneLine">
           <span>✓</span>
           <span>异常数据 <b id="doneCount">21</b> 条已全部处理完成（疑似重复 8 · 数据异常 13），本次导入 25 条已全部入库。</span>
         </div>
 
-        <p class="reason-foot" id="resultFoot">处理完成的数据会立即导入并计入“已入库”；未处理的数据会保留在导入记录中，之后可以随时回来继续处理。</p>
+        <p class="reason-foot" id="resultFoot">未处理的数据会保留在导入记录里，之后可以随时回来继续处理。</p>
       </section>
 
       <div class="toolbar">
-        <button class="tab active" data-tab="rep">疑似重复（<span class="js-cnt-rep">8</span>）</button>
-        <button class="tab" data-tab="err">数据异常（<span class="js-cnt-err">13</span>）</button>
-        <span class="spacer"></span>
-        <span class="tip">带 <span class="req">*</span> 为必填；表格可直接修改，改完点“导入”系统会重新校验</span>
-        <div class="tools">
-          <button class="btn small">填写说明</button>
-          <button class="btn small">下载异常数据</button>
+        <div class="tabs-row">
+          <button class="tab active" data-tab="rep">疑似重复（<span class="js-cnt-rep">8</span>）</button>
+          <button class="tab" data-tab="err">数据异常（<span class="js-cnt-err">13</span>）</button>
+          <span class="spacer"></span>
+          <div class="tools">
+            <div class="guide-wrap">
+              <button class="btn small" id="guideBtn">填写说明</button>
+              <div class="fill-guide" id="fillGuide">
+                <ul>
+                  <li>带 <span class="req">*</span> 的字段为必填项</li>
+                  <li>手机号码、其他联系方式需填写 11 位数字</li>
+                  <li>下拉字段请从选项中选择</li>
+                  <li>表格可直接修改，改完点该行“导入”，系统会重新校验这一条</li>
+                </ul>
+              </div>
+            </div>
+            <button class="btn small">下载异常数据</button>
+          </div>
+        </div>
+        <div class="tab-desc">
+          <span id="tabDesc">姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入。</span>
+          <span class="desc-hint">表格可直接修改</span>
         </div>
       </div>
 
@@ -531,16 +526,19 @@
     document.getElementById('resultIcon').textContent = done ? '✓' : '!';
     document.getElementById('resultTitle').innerHTML = done
       ? `本次导入已完成，${TOTAL} 条已全部入库`
-      : `本次导入 ${TOTAL} 条，其中 <b>${pending()} 条需要你处理</b>`;
+      : `还有 <b>${pending()} 条</b>数据需要你处理`;
     document.getElementById('statOk').textContent = success;
     document.getElementById('statWait').textContent = pending();
-    document.getElementById('legendOk').textContent = success;
-    document.getElementById('legendWait').textContent = pending();
     document.getElementById('barOk').style.width = (success / TOTAL * 100) + '%';
     document.getElementById('barWait').style.width = (pending() / TOTAL * 100) + '%';
-    document.getElementById('reasons').classList.toggle('hide', done);
     document.getElementById('doneLine').classList.toggle('show', done);
     document.getElementById('resultFoot').style.display = done ? 'none' : '';
+
+    // 页签下面的那行说明，跟着当前页签走（不再单独占两块卡片）
+    document.getElementById('tabDesc').textContent = active === 'rep'
+      ? '姓名或手机号与系统里已有学员相同，需要你核对后确认是否当作新学员导入。'
+      : '字段不符合规则（必填为空、格式不对、与已有学员重复），改好后点“导入”重新校验这一条。';
+    document.querySelector('.tab-desc').style.visibility = list.length ? 'visible' : 'hidden';
 
     // 底部操作条
     const left = list.length;
@@ -630,6 +628,15 @@
     if(active === 'err' && text){ text.classList.add('edited'); text.textContent = '已修改，待重新校验'; }
   });
   document.getElementById('batch').addEventListener('click', batchImport);
+
+  const fillGuide = document.getElementById('fillGuide');
+  document.getElementById('guideBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    fillGuide.classList.toggle('show');
+  });
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.guide-wrap')) fillGuide.classList.remove('show');
+  });
 
   function setTab(name){
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
