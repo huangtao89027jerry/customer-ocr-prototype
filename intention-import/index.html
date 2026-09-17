@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>校管家 · 意向学员导入异常处理</title>
+<!-- 设计规范来源：校管家后台（主色 #1768e5 / 背景 #f4f7fb / 卡片圆角 12 / 阴影 0 6 22 rgba(25,56,99,.06)） -->
+<style>
+  :root{
+    --blue:#1768e5; --blue2:#edf5ff; --ink:#172033; --muted:#7d8799; --line:#e8edf5;
+    --bg:#f4f7fb; --orange:#ff8a3d; --red:#f05252; --green:#21b686;
+    --shadow:0 6px 22px rgba(25,56,99,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  button{font:inherit;cursor:pointer}
+  a{color:var(--blue);text-decoration:none}
+
+  /* ---------- 顶栏 ---------- */
+  .topbar{height:72px;background:linear-gradient(105deg,#155ab2,#1768d8);color:#fff;display:flex;align-items:center;
+    padding:0 24px;position:sticky;top:0;z-index:20;box-shadow:0 2px 9px rgba(10,59,126,.18)}
+  .brand{display:flex;align-items:center;width:176px;font-size:21px;font-weight:800;letter-spacing:-1px}
+  .brand-mark{width:34px;height:34px;border-radius:50%;background:#fff;margin-right:9px;position:relative;overflow:hidden}
+  .brand-mark:before,.brand-mark:after{content:"";position:absolute;background:#2b6cc6;border-radius:50%}
+  .brand-mark:before{width:34px;height:12px;left:-12px;top:9px;transform:rotate(-15deg)}
+  .brand-mark:after{width:36px;height:11px;right:-12px;top:18px;transform:rotate(-15deg)}
+  .nav{display:flex;align-self:stretch;gap:2px;flex:1}
+  .nav-item{min-width:82px;padding:9px 10px 7px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:5px;color:rgba(255,255,255,.78);font-size:12px;border-bottom:3px solid transparent}
+  .nav-item.active{background:rgba(255,255,255,.09);color:#fff;border-bottom-color:#7eb5ff}
+  .nav-ico{font-size:18px;line-height:1}
+  .org{height:38px;padding:0 16px;border-radius:22px;background:rgba(255,255,255,.12);display:flex;align-items:center;
+    gap:18px;white-space:nowrap;font-size:13px}
+  .avatar{margin-left:14px;width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.45);
+    background:linear-gradient(135deg,#ffb6a0,#6c9eff);display:grid;place-items:center;font-weight:700;font-size:13px}
+
+  /* ---------- 左侧菜单 + 内容 ---------- */
+  .layout{display:flex;min-height:calc(100vh - 72px)}
+  .side{width:196px;flex:none;background:#fff;border-right:1px solid var(--line);padding:16px 0}
+  .side-title{font-size:15px;font-weight:700;padding:0 18px 10px}
+  .side-group{padding:12px 18px 6px;color:#9aa3b3;font-size:12px}
+  .side-item{display:flex;align-items:center;height:40px;margin:2px 10px;padding:0 12px;border-radius:8px;color:#4b5768;font-size:13px}
+  .side-item.active{background:var(--blue2);color:var(--blue);font-weight:600}
+  .main{flex:1;min-width:0;padding:18px 22px 40px}
+  .crumb{color:#9aa3b3;font-size:13px;margin-bottom:14px}
+
+  .card{background:#fff;border:1px solid rgba(222,229,239,.78);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .card-head{height:54px;padding:0 18px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line)}
+  .card-head h2{margin:0;font-size:16px}
+  .card-head .sub{color:#a0a8b7;font-size:12px}
+
+  .btn{min-width:76px;height:36px;padding:0 16px;border-radius:7px;border:1px solid #d6dde7;background:#fff;color:#586577}
+  .btn:hover{border-color:#a9c8f4;color:var(--blue)}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.primary:hover{background:#125bd0;color:#fff}
+  .btn.small{height:32px;min-width:0;font-size:13px}
+
+  /* ---------- 导入两步 ---------- */
+  .steps{display:grid;grid-template-columns:1fr 1.3fr}
+  .step{padding:20px 22px;border-right:1px solid var(--line)}
+  .step:last-child{border-right:0}
+  .step h3{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:9px}
+  .step-no{width:22px;height:22px;border-radius:50%;background:var(--blue2);color:var(--blue);font-size:12px;font-weight:700;
+    display:grid;place-items:center;flex:none}
+  .step p{margin:0 0 14px;color:var(--muted);font-size:13px}
+  .file-chip{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border:1px solid #dbe9fb;background:#f7fbff;
+    border-radius:9px;margin-bottom:14px}
+  .file-chip .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#33405a}
+  .file-chip .count{color:var(--muted);font-size:12px}
+
+  /* ---------- 导入记录表 ---------- */
+  table.records{width:100%;border-collapse:collapse}
+  table.records th{background:#f8fafc;color:#788394;font-weight:500;text-align:left;height:44px;padding:0 16px;font-size:13px;white-space:nowrap}
+  table.records td{height:52px;padding:0 16px;border-top:1px solid var(--line);font-size:13px;color:#3d4a5f;white-space:nowrap}
+  table.records tr:hover td{background:#fafcff}
+  .tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:5px;font-size:12px;background:var(--blue2);color:#3478d6}
+  .tag.wait{background:#fff4e8;color:#d9802a}
+  .tag.done{background:#eaf9f2;color:#18a06c}
+  .num-ok{color:var(--green);font-weight:600}
+  .num-wait{color:#e8862f;font-weight:600}
+
+  /* ---------- 抽屉 ---------- */
+  .mask{position:fixed;inset:0;background:rgba(20,30,45,.45);z-index:60;display:flex;justify-content:flex-end}
+  .mask.hidden{display:none}
+  .drawer{width:min(1440px,94vw);min-width:1080px;height:100vh;background:var(--bg);display:flex;flex-direction:column;
+    box-shadow:-12px 0 36px rgba(25,38,58,.18)}
+  .drawer-head{height:66px;flex:none;display:flex;align-items:center;gap:10px;padding:0 22px;background:#fff;border-bottom:1px solid var(--line)}
+  .drawer-head h2{margin:0;font-size:19px;font-weight:700}
+  .drawer-head .close{margin-left:auto;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:#7d8795;font-size:24px;line-height:1}
+  .drawer-head .close:hover{background:#f1f4f8}
+  .drawer-body{flex:1;min-height:0;overflow:auto;padding:16px 22px 18px}
+
+  /* ---------- 本次导入结果（重做重点） ---------- */
+  .result{background:#fff;border:1px solid #dbe9fb;border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+  .result-head{display:flex;gap:12px;align-items:flex-start}
+  .result-icon{width:38px;height:38px;flex:none;border-radius:11px;background:#fff3e8;color:#e8862f;display:grid;place-items:center;
+    font-size:20px;font-weight:700}
+  .result-head h3{margin:0 0 6px;font-size:17px}
+  .result-head h3 b{color:#e8862f}
+  .result-head .meta{margin:0;color:var(--muted);font-size:12px}
+
+  .flow{display:flex;align-items:stretch;gap:10px;margin:18px 0 12px}
+  .flow-node{flex:1;display:flex;align-items:baseline;gap:9px;padding:13px 16px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe}
+  .flow-node b{font-size:26px;font-weight:750;letter-spacing:-.6px}
+  .flow-node span{color:var(--muted);font-size:13px}
+  .flow-node.ok{background:#f4fcf8;border-color:#d4f0e2}
+  .flow-node.ok b{color:var(--green)}
+  .flow-node.wait{background:#fffaf4;border-color:#ffe0c2}
+  .flow-node.wait b{color:#e8862f}
+  .flow-arrow{align-self:center;color:#c6cfdd;font-size:18px}
+
+  .bar{height:8px;border-radius:5px;background:#eef2f8;display:flex;overflow:hidden}
+  .bar i{display:block;height:100%}
+  .bar .ok{background:var(--green);width:16%}
+  .bar .wait{background:#ffb77a;width:84%}
+  .bar-legend{display:flex;gap:18px;margin-top:9px;color:var(--muted);font-size:12px}
+  .bar-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  .reasons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .reason{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+  .reason-head{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
+  .reason-head b{font-size:15px}
+  .reason-head .count{font-size:20px;font-weight:750}
+  .reason p{margin:0;color:#657184;font-size:13px;line-height:1.7}
+  .reason.rep{border-left:3px solid #ffb77a}
+  .reason.rep .count{color:#e8862f}
+  .reason.err{border-left:3px solid #f79b9b}
+  .reason.err .count{color:#e05555}
+  .reason-foot{margin:13px 0 0;color:var(--muted);font-size:12px}
+
+  /* ---------- 页签 + 工具条 ---------- */
+  .toolbar{display:flex;align-items:flex-end;gap:22px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .tab{border:0;background:transparent;height:46px;padding:0 4px;color:#5d6879;font-size:15px;position:relative}
+  .tab.active{color:var(--blue);font-weight:600}
+  .tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--blue);border-radius:3px 3px 0 0}
+  .toolbar .spacer{flex:1}
+  .tip{display:flex;align-items:center;gap:6px;color:#98a2b3;font-size:12px;padding-bottom:14px}
+  .toolbar .tools{display:flex;gap:10px;padding-bottom:10px}
+
+  /* ---------- 表格 ---------- */
+  .sheet-wrap{border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff;max-height:calc(100vh - 470px);min-height:300px}
+  table.sheet{border-collapse:separate;border-spacing:0;table-layout:fixed;width:100%;min-width:2122px}
+  table.sheet th,table.sheet td{border-right:1px solid #eef1f6;border-bottom:1px solid #eef1f6;height:46px;padding:0;background:#fff;vertical-align:middle}
+  table.sheet th{height:44px;background:#f8fafc;color:#788394;font-weight:500;text-align:left;padding:0 10px;font-size:13px;
+    position:sticky;top:0;z-index:5;white-space:nowrap}
+  table.sheet tr:hover td{background:#fafcff}
+  table.sheet th:first-child,table.sheet td:first-child{position:sticky;left:0;z-index:6;background:#fff;text-align:center;color:#8b95a6}
+  table.sheet th:first-child{background:#f8fafc;z-index:8}
+  table.sheet th.err,table.sheet td.err{position:sticky;right:92px;z-index:6;background:#fff;box-shadow:-6px 0 10px rgba(25,56,99,.04);padding:6px 10px}
+  table.sheet th.err{background:#f8fafc;z-index:8}
+  table.sheet th.act,table.sheet td.act{position:sticky;right:0;z-index:6;background:#fff;text-align:center;padding:0 6px}
+  table.sheet th.act{background:#f8fafc;z-index:8}
+  .req{color:var(--red);margin-right:3px}
+
+  .cell{width:100%;height:38px;margin:0 6px;padding:0 9px;border:1px solid transparent;border-radius:6px;background:#fbfcfe;
+    color:#3d4a5f;font-size:13px;outline:none}
+  .cell:hover{border-color:#c9ddf7;background:#fff}
+  .cell:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(23,104,229,.12)}
+  .cell.bad{background:#fff4f4;border-color:#f6c6c6;color:#cf4646}
+  .err-text{color:#d4544f;font-size:12px;line-height:1.5}
+  .dup-link{display:block;margin-top:3px;color:var(--blue);font-size:12px}
+  .link-btn{border:0;background:transparent;color:var(--blue);font-size:13px}
+  .link-btn:hover{text-decoration:underline}
+
+  /* ---------- 抽屉底部 ---------- */
+  .drawer-foot{height:66px;flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;background:#fff;border-top:1px solid var(--line);
+    box-shadow:0 -4px 14px rgba(25,56,99,.04)}
+  .drawer-foot .remain{color:#7c8698;font-size:13px}
+  .drawer-foot .remain b{color:#e8862f}
+  .drawer-foot .spacer{flex:1}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark"></span>校管家</div>
+  <nav class="nav">
+    <div class="nav-item"><span class="nav-ico">⌂</span>工作台</div>
+    <div class="nav-item"><span class="nav-ico">✧</span>招生营销</div>
+    <div class="nav-item"><span class="nav-ico">▤</span>前台业务</div>
+    <div class="nav-item"><span class="nav-ico">▦</span>教务管理</div>
+    <div class="nav-item"><span class="nav-ico">☺</span>人事管理</div>
+    <div class="nav-item"><span class="nav-ico">▩</span>进销存管理</div>
+    <div class="nav-item"><span class="nav-ico">¥</span>财务管理</div>
+    <div class="nav-item"><span class="nav-ico">◍</span>家校服务</div>
+    <div class="nav-item"><span class="nav-ico">▥</span>报表中心</div>
+    <div class="nav-item active"><span class="nav-ico">⚙</span>系统设置</div>
+  </nav>
+  <div class="org"><span>黎璐教育集团</span><span>⌄</span></div>
+  <div class="avatar">刘</div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-title">数据导入</div>
+    <div class="side-group">⌄ 招生营销</div>
+    <div class="side-item active">意向学员数据</div>
+    <div class="side-item">沟通记录数据</div>
+    <div class="side-group">⌄ 前台业务</div>
+    <div class="side-item">正式学员数据</div>
+    <div class="side-item">学员积分数据</div>
+    <div class="side-item">学员费用数据</div>
+    <div class="side-group">⌄ 教务管理</div>
+    <div class="side-item">课程数据</div>
+    <div class="side-item">班级数据</div>
+    <div class="side-item">分班数据</div>
+  </aside>
+
+  <main class="main">
+    <div class="crumb">系统设置 / 数据导入 / 意向学员数据</div>
+
+    <section class="card">
+      <div class="steps">
+        <div class="step">
+          <h3><span class="step-no">1</span>下载导入模板，填写数据</h3>
+          <p>模板中已标注各字段的填写要求，按提示填写即可。</p>
+          <button class="btn">下载导入模板</button>
+        </div>
+        <div class="step">
+          <h3><span class="step-no">2</span>上传填写好的模板</h3>
+          <p>支持 .xls、.xlsx 格式，单次最多导入 5000 条。</p>
+          <div class="file-chip">
+            <span>📄</span>
+            <span class="name">意向客户导入模板_202609041012.xlsx</span>
+            <span class="count">25 条</span>
+            <a href="#">重新选择</a>
+          </div>
+          <button class="btn primary">开始导入</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>导入记录</h2><span class="sub">最近 3 次</span></div>
+      <table class="records">
+        <thead>
+          <tr>
+            <th>文件名称</th><th>时间</th><th>总数据</th><th>已成功</th><th>待处理</th><th>状态</th><th>操作人</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>意向客户导入模板_202609041012.xlsx</td>
+            <td>2026-09-04 10:19:33</td>
+            <td>25</td>
+            <td class="num-ok">4</td>
+            <td class="num-wait">21</td>
+            <td><span class="tag wait">待处理 21 条</span></td>
+            <td>内置管理员</td>
+            <td><a href="#rep">处理异常</a></td>
+          </tr>
+          <tr>
+            <td>意向客户导入模板_202312010923.xlsx</td>
+            <td>2023-12-01 09:23:17</td>
+            <td>3</td>
+            <td class="num-ok">3</td>
+            <td>0</td>
+            <td><span class="tag done">已完成</span></td>
+            <td>内置管理员</td>
+            <td><a href="#">查看详情</a></td>
+          </tr>
+          <tr>
+            <td>意向客户导入模板_202304171855.xlsx</td>
+            <td>2023-04-17 18:55:34</td>
+            <td>1</td>
+            <td class="num-ok">1</td>
+            <td>0</td>
+            <td><span class="tag done">已完成</span></td>
+            <td>内置管理员</td>
+            <td><a href="#">查看详情</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<!-- 处理导入异常（导入完成后直接进入，不再单独弹“导入结果”） -->
+<div class="mask">
+  <aside class="drawer">
+    <div class="drawer-head">
+      <h2>处理导入异常</h2>
+      <span class="tag">意向学员数据</span>
+      <button class="close" id="closeDrawer">×</button>
+    </div>
+
+    <div class="drawer-body">
+      <section class="result">
+        <div class="result-head">
+          <span class="result-icon">!</span>
+          <div>
+            <h3>本次导入 25 条，其中 <b>21 条需要你处理</b></h3>
+            <p class="meta">意向客户导入模板_202609041012.xlsx · 2026-09-04 10:19:33 · 内置管理员</p>
+          </div>
+        </div>
+
+        <div class="flow">
+          <div class="flow-node"><b>25</b><span>文件总数据</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node ok"><b>4</b><span>已入库</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node wait"><b>21</b><span>待处理</span></div>
+        </div>
+        <div class="bar"><i class="ok"></i><i class="wait"></i></div>
+        <div class="bar-legend">
+          <span><i style="background:var(--green)"></i>已成功入库 4 条</span>
+          <span><i style="background:#ffb77a"></i>待处理 21 条</span>
+        </div>
+
+        <div class="reasons">
+          <div class="reason rep">
+            <div class="reason-head"><b>疑似重复</b><span class="count">8</span><span>条</span></div>
+            <p>系统里可能已经有同一个学员（姓名或手机号相同），需要你核对后确认是否当作新学员导入。</p>
+          </div>
+          <div class="reason err">
+            <div class="reason-head"><b>数据异常</b><span class="count">13</span><span>条</span></div>
+            <p>表格里有字段不符合规则，例如手机号格式不对、必填项为空、与已有学员重复，需要修改后重新导入。</p>
+          </div>
+        </div>
+
+        <p class="reason-foot">处理完成的数据会立即导入并计入“已入库”；未处理的数据会保留在导入记录中，之后可以随时回来继续处理。</p>
+      </section>
+
+      <div class="toolbar">
+        <button class="tab active" data-tab="rep">疑似重复（8）</button>
+        <button class="tab" data-tab="err">数据异常（13）</button>
+        <span class="spacer"></span>
+        <span class="tip">带 <span class="req">*</span> 为必填；表格可直接修改，改完点“导入”系统会重新校验</span>
+        <div class="tools">
+          <button class="btn small">填写说明</button>
+          <button class="btn small">下载异常数据</button>
+        </div>
+      </div>
+
+      <div class="sheet-wrap">
+        <table class="sheet">
+          <colgroup>
+            <col style="width:54px"><col style="width:120px"><col style="width:96px"><col style="width:120px"><col style="width:170px">
+            <col style="width:110px"><col style="width:120px"><col style="width:130px"><col style="width:100px"><col style="width:100px">
+            <col style="width:100px"><col style="width:120px"><col style="width:100px"><col style="width:120px"><col style="width:120px">
+            <col style="width:250px"><col style="width:92px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th><span class="req">*</span>所属校区</th>
+              <th><span class="req">*</span>姓名</th>
+              <th><span class="req">*</span>手机号码</th>
+              <th>身份证号</th>
+              <th><span class="req">*</span>招生来源</th>
+              <th>其他联系方式</th>
+              <th>招生代理</th>
+              <th>客户有效性</th>
+              <th>主责任人</th>
+              <th>副责任人</th>
+              <th>责任人销售组</th>
+              <th>录单人</th>
+              <th>父亲电话</th>
+              <th>母亲电话</th>
+              <th class="err">异常原因</th>
+              <th class="act">操作</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="drawer-foot">
+      <span class="remain">当前页签还有 <b id="remain">8</b> 条待处理</span>
+      <span class="spacer"></span>
+      <button class="btn primary" id="batch">一键批量导入</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+  const FIELDS = [
+    ['campus','select'],['name','text'],['phone','tel'],['idCard','text'],['source','select'],
+    ['otherContact','tel'],['agent','select'],['validity','select'],['owner','select'],
+    ['assistant','select'],['salesGroup','select'],['operator','select'],['fatherPhone','tel'],['motherPhone','tel']
+  ];
+  const OPTIONS = {
+    campus:['','长沙中电校区','北京乐博','上海徐汇校区'],
+    source:['','自然到访','小红书','老带新','地推活动','线上咨询'],
+    agent:['','无','优学招生代理','长沙星火代理'],
+    validity:['有效','无效'],
+    owner:['','张老师','李老师','王老师','陈老师'],
+    assistant:['','周老师','赵老师','孙老师'],
+    salesGroup:['','招生一组','招生二组','线上咨询组'],
+    operator:['','内置管理员','张老师','李老师']
+  };
+
+  const ROWS = {
+    rep:[
+      {campus:'长沙中电校区',name:'陈晨',phone:'13812345678',idCard:'',source:'老带新',otherContact:'13911112222',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'13987654321',error:'手机号码与现有学员相同',n:1},
+      {campus:'长沙中电校区',name:'王子轩',phone:'18923456789',idCard:'',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'周老师',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'姓名与 2 名现有学员相同',n:2},
+      {campus:'北京乐博',name:'李梓涵',phone:'18666778821',idCard:'',source:'自然到访',otherContact:'13788886666',agent:'无',validity:'有效',owner:'王老师',assistant:'',salesGroup:'招生一组',operator:'张老师',fatherPhone:'13677889910',motherPhone:'',error:'姓名与现有学员相同',n:1},
+      {campus:'上海徐汇校区',name:'张子墨',phone:'17789231106',idCard:'',source:'线上咨询',otherContact:'',agent:'优学招生代理',validity:'有效',owner:'陈老师',assistant:'赵老师',salesGroup:'线上咨询组',operator:'李老师',fatherPhone:'',motherPhone:'17789231106',error:'手机号码与现有学员相同',n:1},
+      {campus:'长沙中电校区',name:'刘一诺',phone:'15344120987',idCard:'',source:'地推活动',otherContact:'',agent:'长沙星火代理',validity:'有效',owner:'张老师',assistant:'孙老师',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'18922334410',motherPhone:'',error:'姓名与 2 名现有学员相同',n:2},
+      {campus:'北京乐博',name:'周雨桐',phone:'18166773210',idCard:'',source:'老带新',otherContact:'18266773210',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'18166773210',error:'手机号码与现有学员相同',n:1},
+      {campus:'长沙中电校区',name:'杨浩然',phone:'19973124567',idCard:'',source:'小红书',otherContact:'18873124567',agent:'无',validity:'有效',owner:'王老师',assistant:'周老师',salesGroup:'线上咨询组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'姓名与现有学员相同',n:1},
+      {campus:'上海徐汇校区',name:'赵欣怡',phone:'15502167890',idCard:'',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'13302161234',motherPhone:'',error:'姓名与 2 名现有学员相同',n:2}
+    ],
+    err:[
+      {campus:'',name:'黄可欣',phone:'13822334451',idCard:'430102201706121526',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'所属校区不能为空',bad:['campus']},
+      {campus:'长沙中电校区',name:'',phone:'18973126651',idCard:'430102201804083247',source:'老带新',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'周老师',salesGroup:'招生一组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'姓名不能为空',bad:['name']},
+      {campus:'北京乐博',name:'这是一个超过五十个字符长度限制的意向学员姓名用于展示姓名超长时的校验失败效果请修改后再导入',phone:'18677889921',idCard:'',source:'自然到访',otherContact:'13277889921',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'姓名不能超过 50 个字符',bad:['name']},
+      {campus:'上海徐汇校区',name:'陈思妍',phone:'139-1234-5678',idCard:'310101201703156842',source:'线上咨询',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'',salesGroup:'线上咨询组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'手机号码格式不正确',bad:['phone']},
+      {campus:'北京乐博',name:'孙语彤',phone:'18677889921',idCard:'110101201811224518',source:'线下转介绍',otherContact:'13277889921',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'招生来源不在可选范围内',bad:['source']},
+      {campus:'长沙中电校区',name:'唐乐乐',phone:'13344556671',idCard:'430102201709103166',source:'地推活动',otherContact:'微信同号',agent:'无',validity:'有效',owner:'张老师',assistant:'孙老师',salesGroup:'招生一组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'其他联系方式格式不正确',bad:['otherContact']},
+      {campus:'长沙中电校区',name:'彭梓轩',phone:'15566778892',idCard:'430102201806072113',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'13800A12345',motherPhone:'',error:'父亲电话只能填数字',bad:['fatherPhone']},
+      {campus:'北京乐博',name:'周可心',phone:'13622',idCard:'110101201712054927',source:'',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'周老师',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'手机号码格式不正确；招生来源不能为空',bad:['phone','source']},
+      {campus:'长沙中电校区',name:'陈晨',phone:'13812345678',idCard:'430102201705181839',source:'老带新',otherContact:'13911112222',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'13987654321',error:'与本次导入表格第 3 行重复'},
+      {campus:'北京乐博',name:'刘小柏',phone:'17829838921',idCard:'110101201603174616',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与刘小柏（北京乐博）重复 · 已有意向学员·手机号码'},
+      {campus:'长沙中电校区',name:'陈思雨',phone:'18173126548',idCard:'430102201612086428',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'',salesGroup:'线上咨询组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与陈思雨（长沙中电校区）重复 · 已有意向学员·身份证号'},
+      {campus:'上海徐汇校区',name:'王子轩',phone:'18902136677',idCard:'310101201704261537',source:'线上咨询',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'赵老师',salesGroup:'线上咨询组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'与王子轩（上海徐汇校区）重复 · 已有正式学员·手机号码'},
+      {campus:'北京乐博',name:'周雨桐',phone:'18166773211',idCard:'110101201710196825',source:'老带新',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'与周雨桐（北京乐博）重复 · 已有正式学员·身份证号'}
+    ]
+  };
+
+  let active = 'rep';
+  const esc = v => String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+  function cell(row, key, type){
+    const bad = (row.bad || []).includes(key) ? ' bad' : '';
+    if(type === 'select'){
+      const list = [...(OPTIONS[key] || [])];
+      if(row[key] && !list.includes(row[key])) list.unshift(row[key]);
+      return `<select class="cell${bad}">${list.map(o => `<option ${o === row[key] ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    }
+    return `<input class="cell${bad}" value="${esc(row[key])}">`;
+  }
+
+  function render(){
+    const list = ROWS[active];
+    document.getElementById('rows').innerHTML = list.map((row, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        ${FIELDS.map(([k, t]) => `<td>${cell(row, k, t)}</td>`).join('')}
+        <td class="err">
+          <div class="err-text">${esc(row.error)}</div>
+          ${active === 'rep' ? `<a class="dup-link" href="#">查看疑似重复学员（${row.n}）</a>` : ''}
+        </td>
+        <td class="act"><button class="link-btn">导入</button></td>
+      </tr>`).join('');
+    document.getElementById('remain').textContent = list.length;
+  }
+
+  const mask = document.querySelector('.mask');
+
+  function setTab(name){
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    active = name;
+    render();
+  }
+  document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setTab(tab.dataset.tab)));
+  document.getElementById('closeDrawer').addEventListener('click', () => mask.classList.add('hidden'));
+  mask.addEventListener('click', e => { if(e.target === mask) mask.classList.add('hidden'); });
+
+  // 静态稿锚点：#rep 疑似重复、#err 数据异常、#list 只看导入记录
+  function applyHash(){
+    const h = location.hash.replace('#', '');
+    if(h === 'list'){ mask.classList.add('hidden'); return; }
+    mask.classList.remove('hidden');
+    if(h === 'rep' || h === 'err') setTab(h);
+  }
+  window.addEventListener('hashchange', applyHash);
+  applyHash();
+  render();
+</script>
+</body>
+</html>
