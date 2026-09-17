@@ -152,9 +152,19 @@
   .cell:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(23,104,229,.12)}
   .cell.bad{background:#fff4f4;border-color:#f6c6c6;color:#cf4646}
   .err-text{color:#d4544f;font-size:12px;line-height:1.5}
+  .err-text.ok{color:#98a2b3}
   .dup-link{display:block;margin-top:3px;color:var(--blue);font-size:12px}
   .link-btn{border:0;background:transparent;color:var(--blue);font-size:13px}
   .link-btn:hover{text-decoration:underline}
+  /* 已处理成功的行：留在列表里但降饱和，只作为核对用 */
+  .cell-text{display:block;padding:0 15px;color:#7c8798}
+  table.sheet tr.row-ok td{background:#fbfdfc}
+  table.sheet tr.row-ok:hover td{background:#f7fcf9}
+  .imported{color:var(--green);font-size:13px;font-weight:600;white-space:nowrap}
+  .show-done{display:inline-flex;align-items:center;gap:6px;color:#8b95a6;font-size:12px;cursor:pointer;
+    align-self:flex-end;padding-bottom:15px;white-space:nowrap}
+  .show-done input{width:14px;height:14px;margin:0;accent-color:var(--blue);cursor:pointer}
+  .show-done.hide{display:none}
 
   /* ---------- 处理完成态 ---------- */
   .result.done{background:linear-gradient(180deg,#f2fbf7,#fff);border-color:#cdeee0}
@@ -336,6 +346,10 @@
         <div class="tabs-row">
           <button class="tab active" data-tab="rep">疑似重复（<span class="js-cnt-rep">8</span>）</button>
           <button class="tab" data-tab="err">数据异常（<span class="js-cnt-err">13</span>）</button>
+          <label class="show-done hide" id="showDoneWrap">
+            <input type="checkbox" id="showDone" checked>
+            <span id="showDoneText">包含已处理成功的数据</span>
+          </label>
           <span class="spacer"></span>
           <div class="tools">
             <div class="guide-wrap">
@@ -455,6 +469,8 @@
   const TOTAL = 25;
   let active = 'rep';
   let success = 4;
+  let showDone = true;                                // 「包含已处理成功的数据」
+  const DONE = {rep:[], err:[]};                      // 已处理成功的行，留在列表里供核对
 
   const esc = v => String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const pending = () => ROWS.rep.length + ROWS.err.length;
@@ -488,13 +504,22 @@
   }
 
   function render(){
-    // 处理完的页签不再占位：自动切到还有数据的那个，两个都处理完就整块收起来
-    if(!ROWS[active].length && ROWS[active === 'rep' ? 'err' : 'rep'].length) active = active === 'rep' ? 'err' : 'rep';
+    const visible = t => ROWS[t].length + (showDone ? DONE[t].length : 0);
+    // 处理完的页签不再占位：自动切到还有内容的那个
+    if(!visible(active) && visible(active === 'rep' ? 'err' : 'rep')) active = active === 'rep' ? 'err' : 'rep';
+
     const list = ROWS[active];
+    const shown = list.concat(showDone ? DONE[active] : []);
     const done = pending() === 0;
 
-    document.querySelector('.sheet').style.display = list.length ? 'table' : 'none';
-    document.getElementById('rows').innerHTML = list.map((row, i) => `
+    document.querySelector('.sheet').style.display = shown.length ? 'table' : 'none';
+    document.getElementById('rows').innerHTML = shown.map((row, i) => row.ok ? `
+      <tr class="row-ok">
+        <td>${i + 1}</td>
+        ${FIELDS.map(([k]) => `<td><span class="cell-text">${esc(row[k]) || '—'}</span></td>`).join('')}
+        <td class="err"><div class="err-text ok">原异常：${esc(row.error)}</div></td>
+        <td class="act"><span class="imported">✓ 导入成功</span></td>
+      </tr>` : `
       <tr>
         <td>${i + 1}</td>
         ${FIELDS.map(([k, t]) => `<td>${cell(row, k, t, i)}</td>`).join('')}
@@ -507,20 +532,28 @@
         <td class="act"><button class="link-btn import-one" data-i="${i}">导入</button></td>
       </tr>`).join('');
 
-    // 全部处理完以后，整块换成完成提示
+    // 没有任何可显示的行时，整块换成完成提示
     const empty = document.getElementById('sheetEmpty');
-    empty.classList.toggle('show', !list.length);
-    if(!list.length){
+    empty.classList.toggle('show', !shown.length);
+    if(!shown.length){
       document.getElementById('emptyTitle').textContent = '本次导入已全部处理完成';
       document.getElementById('emptyTip').textContent = `${TOTAL} 条数据已全部入库，可以关闭本页了`;
     }
 
-    // 页签只显示还有数据的；都处理完就连同工具条一起收起来
+    // 页签只显示还有内容的；都处理完就连同工具条一起收起来
     document.querySelectorAll('.tab').forEach(t => {
-      t.style.display = ROWS[t.dataset.tab].length ? '' : 'none';
+      t.style.display = visible(t.dataset.tab) ? '' : 'none';
       t.classList.toggle('active', t.dataset.tab === active);
     });
-    document.querySelector('.toolbar').style.display = done ? 'none' : '';
+    document.querySelector('.toolbar').style.display = (visible('rep') || visible('err')) ? '' : 'none';
+
+    // 「包含已处理成功的数据」开关
+    const doneTotal = DONE.rep.length + DONE.err.length;
+    document.getElementById('showDoneWrap').classList.toggle('hide', !doneTotal);
+    document.getElementById('showDone').checked = showDone;
+    document.getElementById('showDoneText').textContent = DONE[active].length
+      ? `包含已处理成功的数据（${DONE[active].length}）`
+      : '包含已处理成功的数据';
 
     // 顶部结果概览（跟着处理进度走）
     document.querySelectorAll('.js-cnt-rep').forEach(el => el.textContent = ROWS.rep.length);
@@ -545,7 +578,7 @@
     // 底部操作条
     const left = list.length;
     document.getElementById('footText').innerHTML = done ? '本批次已全部处理完成'
-      : (left ? `当前页签还有 <b>${left}</b> 条待处理` : '当前页签已全部处理完成');
+      : (left ? `当前页签还有 <b>${left}</b> 条待处理` : '当前页签已无待处理数据');
     document.getElementById('batch').disabled = !left;
     document.getElementById('batch').textContent = left ? '一键批量导入' : '已全部处理';
 
@@ -566,19 +599,32 @@
     setTimeout(() => el.remove(), 2400);
   }
 
-  // 页签处理完时在提示里说一句，用户才知道页签为什么消失了
-  function doneToast(base){
-    return pending() ? `${base}，${TYPE_NAME[active]}已全部处理完成`
+  // 处理成功：从待处理里挪到"已处理成功"，留在列表末尾供核对
+  function finishRow(tab, i){
+    const row = ROWS[tab].splice(i, 1)[0];
+    row.ok = true; row.bad = []; row.touched = false;
+    DONE[tab].push(row);
+    success++;
+    // 这个页签没有待处理的了，就自动去到还有待处理的那个
+    const other = tab === 'rep' ? 'err' : 'rep';
+    if(!ROWS[tab].length && ROWS[other].length) active = other;
+  }
+
+  // 页签处理完时在提示里说一句，用户才知道页签为什么收起
+  function doneToast(base, tab){
+    if(ROWS[tab].length) return base;
+    return pending() ? `${base}，${TYPE_NAME[tab]}已全部处理完成`
       : `${base}，本次导入全部完成（共 ${TOTAL} 条）`;
   }
 
   function importOne(i){
-    const list = ROWS[active];
+    const tab = active;
+    const list = ROWS[tab];
     const row = list[i];
     if(!row) return;
-    if(active === 'rep'){                       // 疑似重复：确认为新学员后直接导入
-      list.splice(i, 1); success++;
-      const msg = doneToast('已作为新学员导入 1 条');
+    if(tab === 'rep'){                          // 疑似重复：确认为新学员后直接导入
+      finishRow(tab, i);
+      const msg = doneToast('已作为新学员导入 1 条', tab);
       render(); toast(msg, 'ok');
       return;
     }
@@ -591,18 +637,19 @@
       toast('还有字段不符合要求，请按“异常原因”修改后再导入', 'bad');
       return;
     }
-    list.splice(i, 1); success++;
-    const msg = doneToast('已导入 1 条');
+    finishRow(tab, i);
+    const msg = doneToast('已导入 1 条', tab);
     render();
     toast(msg, 'ok');
   }
 
   function batchImport(){
-    const list = ROWS[active];
+    const tab = active;
+    const list = ROWS[tab];
     if(!list.length) return;
-    if(active === 'rep'){
+    if(tab === 'rep'){
       const n = list.length;
-      list.length = 0; success += n;
+      for(let i = list.length - 1; i >= 0; i--) finishRow(tab, i);
       const msg = `已把 ${n} 条疑似重复数据作为新学员导入` + (pending() ? `，还剩 ${pending()} 条数据异常` : '，本次导入全部完成');
       render(); toast(msg, 'ok');
       return;
@@ -611,7 +658,7 @@
     for(let i = list.length - 1; i >= 0; i--){
       const {issues, msgs} = validate(list[i]);
       if(msgs.length){ list[i].touched = false; list[i].bad = Object.keys(issues); list[i].error = msgs.join('；'); fail++; }
-      else { list.splice(i, 1); ok++; success++; }
+      else { finishRow(tab, i); ok++; }
     }
     render();
     if(ok && !fail) toast(`成功导入 ${ok} 条${pending() ? '，数据异常已全部处理完成' : '，本次导入全部完成'}`, 'ok');
@@ -639,6 +686,10 @@
     if(active === 'err' && text){ text.classList.add('edited'); text.textContent = '已修改，待重新校验'; }
   });
   document.getElementById('batch').addEventListener('click', batchImport);
+  document.getElementById('showDone').addEventListener('change', e => {
+    showDone = e.target.checked;
+    render();
+  });
 
   const fillGuide = document.getElementById('fillGuide');
   document.getElementById('guideBtn').addEventListener('click', e => {
