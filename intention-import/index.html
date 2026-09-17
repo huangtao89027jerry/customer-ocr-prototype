@@ -163,12 +163,40 @@
   .link-btn{border:0;background:transparent;color:var(--blue);font-size:13px}
   .link-btn:hover{text-decoration:underline}
 
+  /* ---------- 处理完成态 ---------- */
+  .result.done{background:linear-gradient(180deg,#f2fbf7,#fff);border-color:#cdeee0}
+  .result.done .result-icon{background:#eaf9f2;color:var(--green)}
+  .result.done .result-head h3{color:#146c47}
+  .bar .ok{transition:width .25s ease}
+  .bar .wait{transition:width .25s ease}
+  .done-line{display:none;align-items:center;gap:9px;margin-top:16px;padding:13px 16px;background:#f4fcf8;
+    border:1px solid #d4f0e2;border-radius:10px;color:#1d7d5c;font-size:13px}
+  .done-line.show{display:flex}
+  .reasons.hide{display:none}
+  .err-text.edited{color:#3f7fd0}
+
+  .sheet-empty{display:none;min-height:280px;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#7d8799}
+  .sheet-empty.show{display:flex}
+  .sheet-empty .done-icon{width:54px;height:54px;border-radius:50%;background:#eaf9f2;color:var(--green);
+    display:grid;place-items:center;font-size:26px}
+  .sheet-empty b{color:var(--ink);font-size:15px}
+  .sheet-empty span{font-size:13px}
+
+  .toast-wrap{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;
+    gap:10px;align-items:center;pointer-events:none}
+  .toast{background:#253248;color:#fff;padding:10px 18px;border-radius:7px;font-size:13px;box-shadow:0 8px 24px rgba(20,35,60,.22);
+    animation:tin .18s ease}
+  .toast.ok{background:#12855a}
+  .toast.bad{background:#b8452f}
+  @keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
   /* ---------- 抽屉底部 ---------- */
   .drawer-foot{height:66px;flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;background:#fff;border-top:1px solid var(--line);
     box-shadow:0 -4px 14px rgba(25,56,99,.04)}
   .drawer-foot .remain{color:#7c8698;font-size:13px}
   .drawer-foot .remain b{color:#e8862f}
   .drawer-foot .spacer{flex:1}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -244,11 +272,11 @@
             <td>意向客户导入模板_202609041012.xlsx</td>
             <td>2026-09-04 10:19:33</td>
             <td>25</td>
-            <td class="num-ok">4</td>
-            <td class="num-wait">21</td>
-            <td><span class="tag wait">待处理 21 条</span></td>
+            <td class="num-ok" id="recOk">4</td>
+            <td class="num-wait" id="recWait">21</td>
+            <td><span class="tag wait" id="recState">待处理 21 条</span></td>
             <td>内置管理员</td>
-            <td><a href="#rep">处理异常</a></td>
+            <td><a href="#rep" id="recLink">处理异常</a></td>
           </tr>
           <tr>
             <td>意向客户导入模板_202312010923.xlsx</td>
@@ -286,11 +314,11 @@
     </div>
 
     <div class="drawer-body">
-      <section class="result">
+      <section class="result" id="result">
         <div class="result-head">
-          <span class="result-icon">!</span>
+          <span class="result-icon" id="resultIcon">!</span>
           <div>
-            <h3>本次导入 25 条，其中 <b>21 条需要你处理</b></h3>
+            <h3 id="resultTitle">本次导入 25 条，其中 <b>21 条需要你处理</b></h3>
             <p class="meta">意向客户导入模板_202609041012.xlsx · 2026-09-04 10:19:33 · 内置管理员</p>
           </div>
         </div>
@@ -298,33 +326,38 @@
         <div class="flow">
           <div class="flow-node"><b>25</b><span>文件总数据</span></div>
           <span class="flow-arrow">→</span>
-          <div class="flow-node ok"><b>4</b><span>已入库</span></div>
+          <div class="flow-node ok"><b id="statOk">4</b><span>已入库</span></div>
           <span class="flow-arrow">→</span>
-          <div class="flow-node wait"><b>21</b><span>待处理</span></div>
+          <div class="flow-node wait"><b id="statWait">21</b><span>待处理</span></div>
         </div>
-        <div class="bar"><i class="ok"></i><i class="wait"></i></div>
+        <div class="bar"><i class="ok" id="barOk"></i><i class="wait" id="barWait"></i></div>
         <div class="bar-legend">
-          <span><i style="background:var(--green)"></i>已成功入库 4 条</span>
-          <span><i style="background:#ffb77a"></i>待处理 21 条</span>
+          <span><i style="background:var(--green)"></i>已成功入库 <b id="legendOk">4</b> 条</span>
+          <span><i style="background:#ffb77a"></i>待处理 <b id="legendWait">21</b> 条</span>
         </div>
 
-        <div class="reasons">
+        <div class="reasons" id="reasons">
           <div class="reason rep">
-            <div class="reason-head"><b>疑似重复</b><span class="count">8</span><span>条</span></div>
+            <div class="reason-head"><b>疑似重复</b><span class="count js-cnt-rep">8</span><span>条</span></div>
             <p>系统里可能已经有同一个学员（姓名或手机号相同），需要你核对后确认是否当作新学员导入。</p>
           </div>
           <div class="reason err">
-            <div class="reason-head"><b>数据异常</b><span class="count">13</span><span>条</span></div>
+            <div class="reason-head"><b>数据异常</b><span class="count js-cnt-err">13</span><span>条</span></div>
             <p>表格里有字段不符合规则，例如手机号格式不对、必填项为空、与已有学员重复，需要修改后重新导入。</p>
           </div>
         </div>
 
-        <p class="reason-foot">处理完成的数据会立即导入并计入“已入库”；未处理的数据会保留在导入记录中，之后可以随时回来继续处理。</p>
+        <div class="done-line" id="doneLine">
+          <span>✓</span>
+          <span>异常数据 <b id="doneCount">21</b> 条已全部处理完成（疑似重复 8 · 数据异常 13），本次导入 25 条已全部入库。</span>
+        </div>
+
+        <p class="reason-foot" id="resultFoot">处理完成的数据会立即导入并计入“已入库”；未处理的数据会保留在导入记录中，之后可以随时回来继续处理。</p>
       </section>
 
       <div class="toolbar">
-        <button class="tab active" data-tab="rep">疑似重复（8）</button>
-        <button class="tab" data-tab="err">数据异常（13）</button>
+        <button class="tab active" data-tab="rep">疑似重复（<span class="js-cnt-rep">8</span>）</button>
+        <button class="tab" data-tab="err">数据异常（<span class="js-cnt-err">13</span>）</button>
         <span class="spacer"></span>
         <span class="tip">带 <span class="req">*</span> 为必填；表格可直接修改，改完点“导入”系统会重新校验</span>
         <div class="tools">
@@ -364,16 +397,23 @@
           </thead>
           <tbody id="rows"></tbody>
         </table>
+        <div class="sheet-empty" id="sheetEmpty">
+          <div class="done-icon">✓</div>
+          <b id="emptyTitle">数据异常已全部处理完成</b>
+          <span id="emptyTip"></span>
+        </div>
       </div>
     </div>
 
     <div class="drawer-foot">
-      <span class="remain">当前页签还有 <b id="remain">8</b> 条待处理</span>
+      <span class="remain" id="footText">当前页签还有 <b id="remain">8</b> 条待处理</span>
       <span class="spacer"></span>
       <button class="btn primary" id="batch">一键批量导入</button>
     </div>
   </aside>
 </div>
+
+<div class="toast-wrap" id="toasts"></div>
 
 <script>
   const FIELDS = [
@@ -406,49 +446,190 @@
     err:[
       {campus:'',name:'黄可欣',phone:'13822334451',idCard:'430102201706121526',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'所属校区不能为空',bad:['campus']},
       {campus:'长沙中电校区',name:'',phone:'18973126651',idCard:'430102201804083247',source:'老带新',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'周老师',salesGroup:'招生一组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'姓名不能为空',bad:['name']},
-      {campus:'北京乐博',name:'这是一个超过五十个字符长度限制的意向学员姓名用于展示姓名超长时的校验失败效果请修改后再导入',phone:'18677889921',idCard:'',source:'自然到访',otherContact:'13277889921',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'姓名不能超过 50 个字符',bad:['name']},
+      {campus:'北京乐博',name:'这是一个超过五十个字符长度限制的意向学员姓名用于展示姓名字段超过最大长度时的校验失败效果请及时修改相关内容后再重新操作导入',phone:'18677889921',idCard:'',source:'自然到访',otherContact:'13277889921',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'姓名不能超过 50 个字符',bad:['name']},
       {campus:'上海徐汇校区',name:'陈思妍',phone:'139-1234-5678',idCard:'310101201703156842',source:'线上咨询',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'',salesGroup:'线上咨询组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'手机号码格式不正确',bad:['phone']},
       {campus:'北京乐博',name:'孙语彤',phone:'18677889921',idCard:'110101201811224518',source:'线下转介绍',otherContact:'13277889921',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'招生来源不在可选范围内',bad:['source']},
       {campus:'长沙中电校区',name:'唐乐乐',phone:'13344556671',idCard:'430102201709103166',source:'地推活动',otherContact:'微信同号',agent:'无',validity:'有效',owner:'张老师',assistant:'孙老师',salesGroup:'招生一组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'其他联系方式格式不正确',bad:['otherContact']},
       {campus:'长沙中电校区',name:'彭梓轩',phone:'15566778892',idCard:'430102201806072113',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'13800A12345',motherPhone:'',error:'父亲电话只能填数字',bad:['fatherPhone']},
       {campus:'北京乐博',name:'周可心',phone:'13622',idCard:'110101201712054927',source:'',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'周老师',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'手机号码格式不正确；招生来源不能为空',bad:['phone','source']},
-      {campus:'长沙中电校区',name:'陈晨',phone:'13812345678',idCard:'430102201705181839',source:'老带新',otherContact:'13911112222',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'13987654321',error:'与本次导入表格第 3 行重复'},
-      {campus:'北京乐博',name:'刘小柏',phone:'17829838921',idCard:'110101201603174616',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与刘小柏（北京乐博）重复 · 已有意向学员·手机号码'},
-      {campus:'长沙中电校区',name:'陈思雨',phone:'18173126548',idCard:'430102201612086428',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'',salesGroup:'线上咨询组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与陈思雨（长沙中电校区）重复 · 已有意向学员·身份证号'},
-      {campus:'上海徐汇校区',name:'王子轩',phone:'18902136677',idCard:'310101201704261537',source:'线上咨询',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'赵老师',salesGroup:'线上咨询组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'与王子轩（上海徐汇校区）重复 · 已有正式学员·手机号码'},
-      {campus:'北京乐博',name:'周雨桐',phone:'18166773211',idCard:'110101201710196825',source:'老带新',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'与周雨桐（北京乐博）重复 · 已有正式学员·身份证号'}
+      {campus:'长沙中电校区',name:'陈晨',phone:'13812345678',idCard:'430102201705181839',source:'老带新',otherContact:'13911112222',agent:'无',validity:'有效',owner:'张老师',assistant:'',salesGroup:'招生一组',operator:'内置管理员',fatherPhone:'',motherPhone:'13987654321',error:'与本次导入表格第 3 行重复',conflict:{keys:['name','phone'],original:{name:'陈晨',phone:'13812345678'},message:'与本次导入表格第 3 行重复'}},
+      {campus:'北京乐博',name:'刘小柏',phone:'17829838921',idCard:'110101201603174616',source:'自然到访',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与刘小柏（北京乐博）重复 · 已有意向学员·手机号码',conflict:{keys:['phone'],original:{phone:'17829838921'},message:'与刘小柏（北京乐博）重复 · 已有意向学员·手机号码'}},
+      {campus:'长沙中电校区',name:'陈思雨',phone:'18173126548',idCard:'430102201612086428',source:'小红书',otherContact:'',agent:'无',validity:'有效',owner:'王老师',assistant:'',salesGroup:'线上咨询组',operator:'内置管理员',fatherPhone:'',motherPhone:'',error:'与陈思雨（长沙中电校区）重复 · 已有意向学员·身份证号',conflict:{keys:['idCard'],original:{idCard:'430102201612086428'},message:'与陈思雨（长沙中电校区）重复 · 已有意向学员·身份证号'}},
+      {campus:'上海徐汇校区',name:'王子轩',phone:'18902136677',idCard:'310101201704261537',source:'线上咨询',otherContact:'',agent:'无',validity:'有效',owner:'陈老师',assistant:'赵老师',salesGroup:'线上咨询组',operator:'李老师',fatherPhone:'',motherPhone:'',error:'与王子轩（上海徐汇校区）重复 · 已有正式学员·手机号码',conflict:{keys:['phone'],original:{phone:'18902136677'},message:'与王子轩（上海徐汇校区）重复 · 已有正式学员·手机号码'}},
+      {campus:'北京乐博',name:'周雨桐',phone:'18166773211',idCard:'110101201710196825',source:'老带新',otherContact:'',agent:'无',validity:'有效',owner:'李老师',assistant:'',salesGroup:'招生二组',operator:'张老师',fatherPhone:'',motherPhone:'',error:'与周雨桐（北京乐博）重复 · 已有正式学员·身份证号',conflict:{keys:['idCard'],original:{idCard:'110101201710196825'},message:'与周雨桐（北京乐博）重复 · 已有正式学员·身份证号'}}
     ]
   };
 
+  const TOTAL = 25;
   let active = 'rep';
-  const esc = v => String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  let success = 4;
 
-  function cell(row, key, type){
+  const esc = v => String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const pending = () => ROWS.rep.length + ROWS.err.length;
+  const TYPE_NAME = {rep:'疑似重复', err:'数据异常'};
+
+  function cell(row, key, type, i){
     const bad = (row.bad || []).includes(key) ? ' bad' : '';
     if(type === 'select'){
       const list = [...(OPTIONS[key] || [])];
       if(row[key] && !list.includes(row[key])) list.unshift(row[key]);
-      return `<select class="cell${bad}">${list.map(o => `<option ${o === row[key] ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+      return `<select class="cell${bad}" data-i="${i}" data-k="${key}">${list.map(o => `<option ${o === row[key] ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
     }
-    return `<input class="cell${bad}" value="${esc(row[key])}">`;
+    return `<input class="cell${bad}" data-i="${i}" data-k="${key}" value="${esc(row[key])}">`;
+  }
+
+  // 与导入时同一套校验规则
+  function validate(row){
+    const issues = {};
+    if(!row.campus) issues.campus = '所属校区不能为空';
+    if(!row.name.trim()) issues.name = '姓名不能为空';
+    else if(Array.from(row.name.trim()).length > 50) issues.name = '姓名不能超过 50 个字符';
+    if(!/^1\d{10}$/.test((row.phone || '').trim())) issues.phone = '手机号码格式不正确';
+    if(!row.source) issues.source = '招生来源不能为空';
+    else if(!OPTIONS.source.includes(row.source)) issues.source = '招生来源不在可选范围内';
+    if(row.otherContact && !/^1\d{10}$/.test(row.otherContact.trim())) issues.otherContact = '其他联系方式格式不正确';
+    if(row.fatherPhone && !/^\d+$/.test(row.fatherPhone.trim())) issues.fatherPhone = '父亲电话只能填数字';
+    if(row.motherPhone && !/^\d+$/.test(row.motherPhone.trim())) issues.motherPhone = '母亲电话只能填数字';
+    const msgs = Object.values(issues);
+    if(row.conflict && row.conflict.keys.every(k => row[k] === row.conflict.original[k])) msgs.push(row.conflict.message);
+    return {issues, msgs};
   }
 
   function render(){
     const list = ROWS[active];
+    const done = pending() === 0;
+
+    document.querySelector('.sheet').style.display = list.length ? 'table' : 'none';
     document.getElementById('rows').innerHTML = list.map((row, i) => `
       <tr>
         <td>${i + 1}</td>
-        ${FIELDS.map(([k, t]) => `<td>${cell(row, k, t)}</td>`).join('')}
+        ${FIELDS.map(([k, t]) => `<td>${cell(row, k, t, i)}</td>`).join('')}
         <td class="err">
-          <div class="err-text">${esc(row.error)}</div>
+          ${active === 'err' && row.touched
+            ? `<div class="err-text edited">已修改，待重新校验</div>`
+            : `<div class="err-text">${esc(row.error)}</div>`}
           ${active === 'rep' ? `<a class="dup-link" href="#">查看疑似重复学员（${row.n}）</a>` : ''}
         </td>
-        <td class="act"><button class="link-btn">导入</button></td>
+        <td class="act"><button class="link-btn import-one" data-i="${i}">导入</button></td>
       </tr>`).join('');
-    document.getElementById('remain').textContent = list.length;
+
+    // 页签空了以后的完成提示
+    const empty = document.getElementById('sheetEmpty');
+    empty.classList.toggle('show', !list.length);
+    if(!list.length){
+      const other = active === 'rep' ? 'err' : 'rep';
+      document.getElementById('emptyTitle').textContent = done ? '本次导入已全部处理完成' : `${TYPE_NAME[active]}已全部处理完成`;
+      document.getElementById('emptyTip').textContent = done
+        ? `${TOTAL} 条数据已全部入库，可以关闭本页了`
+        : `还剩 ${ROWS[other].length} 条${TYPE_NAME[other]}，切到另一个页签继续处理`;
+    }
+
+    // 顶部结果概览（跟着处理进度走）
+    document.querySelectorAll('.js-cnt-rep').forEach(el => el.textContent = ROWS.rep.length);
+    document.querySelectorAll('.js-cnt-err').forEach(el => el.textContent = ROWS.err.length);
+    document.getElementById('result').classList.toggle('done', done);
+    document.getElementById('resultIcon').textContent = done ? '✓' : '!';
+    document.getElementById('resultTitle').innerHTML = done
+      ? `本次导入已完成，${TOTAL} 条已全部入库`
+      : `本次导入 ${TOTAL} 条，其中 <b>${pending()} 条需要你处理</b>`;
+    document.getElementById('statOk').textContent = success;
+    document.getElementById('statWait').textContent = pending();
+    document.getElementById('legendOk').textContent = success;
+    document.getElementById('legendWait').textContent = pending();
+    document.getElementById('barOk').style.width = (success / TOTAL * 100) + '%';
+    document.getElementById('barWait').style.width = (pending() / TOTAL * 100) + '%';
+    document.getElementById('reasons').classList.toggle('hide', done);
+    document.getElementById('doneLine').classList.toggle('show', done);
+    document.getElementById('resultFoot').style.display = done ? 'none' : '';
+
+    // 底部操作条
+    const left = list.length;
+    document.getElementById('footText').innerHTML = done ? '本批次已全部处理完成'
+      : (left ? `当前页签还有 <b>${left}</b> 条待处理` : '当前页签已全部处理完成');
+    document.getElementById('batch').disabled = !left;
+    document.getElementById('batch').textContent = left ? '一键批量导入' : '已全部处理';
+
+    // 回写到导入记录列表
+    document.getElementById('recOk').textContent = success;
+    document.getElementById('recWait').textContent = pending();
+    const st = document.getElementById('recState');
+    st.className = 'tag ' + (done ? 'done' : 'wait');
+    st.textContent = done ? '已完成' : `待处理 ${pending()} 条`;
+    document.getElementById('recLink').textContent = done ? '查看详情' : '处理异常';
+  }
+
+  function toast(text, type){
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type || '');
+    el.textContent = text;
+    document.getElementById('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 2400);
+  }
+
+  function importOne(i){
+    const list = ROWS[active];
+    const row = list[i];
+    if(!row) return;
+    if(active === 'rep'){                       // 疑似重复：确认为新学员后直接导入
+      list.splice(i, 1); success++;
+      render(); toast('已作为新学员导入 1 条', 'ok');
+      return;
+    }
+    const {issues, msgs} = validate(row);
+    if(msgs.length){
+      row.touched = false;
+      row.bad = Object.keys(issues);
+      row.error = msgs.join('；');
+      render();
+      toast('还有字段不符合要求，请按“异常原因”修改后再导入', 'bad');
+      return;
+    }
+    list.splice(i, 1); success++;
+    render();
+    toast(pending() ? '已导入 1 条' : `已导入 1 条，本次导入全部完成（共 ${TOTAL} 条）`, 'ok');
+  }
+
+  function batchImport(){
+    const list = ROWS[active];
+    if(!list.length) return;
+    if(active === 'rep'){
+      const n = list.length;
+      list.length = 0; success += n;
+      render(); toast(`已把 ${n} 条疑似重复数据作为新学员导入，本次导入全部完成`, 'ok');
+      return;
+    }
+    let ok = 0, fail = 0;
+    for(let i = list.length - 1; i >= 0; i--){
+      const {issues, msgs} = validate(list[i]);
+      if(msgs.length){ list[i].touched = false; list[i].bad = Object.keys(issues); list[i].error = msgs.join('；'); fail++; }
+      else { list.splice(i, 1); ok++; success++; }
+    }
+    render();
+    if(ok && !fail) toast(`成功导入 ${ok} 条${pending() ? '' : '，本次导入全部完成'}`, 'ok');
+    else if(ok) toast(`成功导入 ${ok} 条，${fail} 条仍需修改`, 'bad');
+    else toast(`${fail} 条仍未通过校验，请按“异常原因”修改后再导入`, 'bad');
   }
 
   const mask = document.querySelector('.mask');
+
+  document.getElementById('rows').addEventListener('click', e => {
+    const btn = e.target.closest('.import-one');
+    if(btn) importOne(+btn.dataset.i);
+  });
+  // 改完立刻去红，异常原因变成“已修改，待重新校验”
+  document.getElementById('rows').addEventListener('input', e => {
+    const el = e.target.closest('.cell');
+    if(!el) return;
+    const row = ROWS[active][+el.dataset.i];
+    if(!row) return;
+    row[el.dataset.k] = el.value;
+    if(row.bad) row.bad = row.bad.filter(k => k !== el.dataset.k);
+    el.classList.remove('bad');
+    row.touched = true;
+    const text = document.querySelector('#rows tr:nth-child(' + (+el.dataset.i + 1) + ') .err-text');
+    if(active === 'err' && text){ text.classList.add('edited'); text.textContent = '已修改，待重新校验'; }
+  });
+  document.getElementById('batch').addEventListener('click', batchImport);
 
   function setTab(name){
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
@@ -459,9 +640,10 @@
   document.getElementById('closeDrawer').addEventListener('click', () => mask.classList.add('hidden'));
   mask.addEventListener('click', e => { if(e.target === mask) mask.classList.add('hidden'); });
 
-  // 静态稿锚点：#rep 疑似重复、#err 数据异常、#list 只看导入记录
+  // 静态稿锚点：#rep 疑似重复、#err 数据异常、#list 只看导入记录、#done 全部处理完的完成态
   function applyHash(){
     const h = location.hash.replace('#', '');
+    if(h === 'done'){ ROWS.rep.length = 0; ROWS.err.length = 0; success = TOTAL; }
     if(h === 'list'){ mask.classList.add('hidden'); return; }
     mask.classList.remove('hidden');
     if(h === 'rep' || h === 'err') setTab(h);
